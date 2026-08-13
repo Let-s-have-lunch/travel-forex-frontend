@@ -1,3 +1,206 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+/* =========================================================
+   🌿 Travel Forex Asset Manager
+   Global Color System
+   ========================================================= */
+
+/* ---------------------------------------------------------
+   ☀️ LIGHT MODE
+   --------------------------------------------------------- */
+
+:root {
+    /* ===== Primary / Brand ===== */
+    --primary-main: #6bc1b6;
+    --primary-light: #a8dcd5;
+    --primary-sub: #dff3f0;
+    --primary-dark: #3fa299;
+
+    /* ===== Accent ===== */
+    --accent-coral: #ff8a7a;
+    --accent-peach: #ffd9c7;
+    --accent-sky: #8abfe6;
+    --accent-lavender: #c7c3f3;
+
+    /* ===== Background / Surface ===== */
+    --background: #f7f9f8;
+    --surface: #ffffff;
+    --card: #ffffff;
+
+    /* ===== Border / Divider ===== */
+    --border: #e6e9e7;
+    --divider: #eceef0;
+    --disabled: #f0f2f1;
+
+    /* ===== Text ===== */
+    --text-primary: #1e2a27;
+    --text-secondary: #54615c;
+    --text-tertiary: #86918c;
+    --text-disabled: #b7c1be;
+
+    /* ===== Semantic ===== */
+    --success: #4caf7a;
+    --warning: #ffb84d;
+    --error: #ff6b6b;
+    --info: #4da3ff;
+
+    /* ===== Chart ===== */
+    --chart-1: #6bc1b6;
+    --chart-2: #8abfe6;
+    --chart-3: #ffb84d;
+    --chart-4: #c7c3f3;
+    --chart-5: #ff8a7a;
+    --chart-6: #a8dcd5;
+
+    /* ===== Gradient ===== */
+    --gradient-primary: linear-gradient(
+            135deg,
+            #6bc1b6 0%,
+            #a8dcd5 100%
+    );
+
+    --gradient-sunset: linear-gradient(
+            135deg,
+            #ff8a7a 0%,
+            #ffd9c7 100%
+    );
+}
+
+
+/* ---------------------------------------------------------
+   🌙 DARK MODE
+   --------------------------------------------------------- */
+
+.dark {
+    /* ===== Primary / Brand ===== */
+    --primary-main: #5ab0a6;
+    --primary-light: #7fd0c6;
+    --primary-sub: #2d4a45;
+    --primary-dark: #3d7f77;
+
+    /* ===== Accent ===== */
+    --accent-coral: #ff8a7a;
+    --accent-peach: #ffbfa8;
+    --accent-sky: #68a8d8;
+    --accent-lavender: #a9a3e6;
+
+    /* ===== Background / Surface ===== */
+    --background: #121817;
+    --surface: #1a1f1d;
+    --card: #1f2825;
+
+    /* ===== Border / Divider ===== */
+    --border: #283230;
+    --divider: #2a302f;
+    --disabled: #1a1f1d;
+
+    /* ===== Text ===== */
+    --text-primary: #f2f5f4;
+    --text-secondary: #c7d0cd;
+    --text-tertiary: #93a19c;
+    --text-disabled: #657068;
+
+    /* ===== Semantic ===== */
+    --success: #66d19a;
+    --warning: #ffc46b;
+    --error: #ff7b7b;
+    --info: #65b3ff;
+
+    /* ===== Chart ===== */
+    --chart-1: #5ab0a6;
+    --chart-2: #68a8d8;
+    --chart-3: #ffc46b;
+    --chart-4: #a9a3e6;
+    --chart-5: #ff8a7a;
+    --chart-6: #7fd0c6;
+
+    /* ===== Gradient ===== */
+    --gradient-primary: linear-gradient(
+            135deg,
+            #5ab0a6 0%,
+            #7fd0c6 100%
+    );
+
+    --gradient-sunset: linear-gradient(
+            135deg,
+            #ff8a7a 0%,
+            #ffbfa8 100%
+    );
+}
+
+
+/* ---------------------------------------------------------
+   🎨 Tailwind Theme
+   --------------------------------------------------------- */
+
+@theme {
+    /* Primary */
+    --color-primary-main: var(--primary-main);
+    --color-primary-light: var(--primary-light);
+    --color-primary-sub: var(--primary-sub);
+    --color-primary-dark: var(--primary-dark);
+
+    /* Accent */
+    --color-accent-coral: var(--accent-coral);
+    --color-accent-peach: var(--accent-peach);
+    --color-accent-sky: var(--accent-sky);
+    --color-accent-lavender: var(--accent-lavender);
+
+    /* Background */
+    --color-background: var(--background);
+    --color-surface: var(--surface);
+    --color-card: var(--card);
+
+    /* Border */
+    --color-border: var(--border);
+    --color-divider: var(--divider);
+    --color-disabled: var(--disabled);
+
+    /* Text */
+    --color-text-primary: var(--text-primary);
+    --color-text-secondary: var(--text-secondary);
+    --color-text-tertiary: var(--text-tertiary);
+    --color-text-disabled: var(--text-disabled);
+
+    /* Semantic */
+    --color-success: var(--success);
+    --color-warning: var(--warning);
+    --color-error: var(--error);
+    --color-info: var(--info);
+
+    /* Chart */
+    --color-chart-1: var(--chart-1);
+    --color-chart-2: var(--chart-2);
+    --color-chart-3: var(--chart-3);
+    --color-chart-4: var(--chart-4);
+    --color-chart-5: var(--chart-5);
+    --color-chart-6: var(--chart-6);
+}
+
+
+/* ---------------------------------------------------------
+   🧱 Base
+   --------------------------------------------------------- */
+
+@layer base {
+    html {
+        background-color: var(--background);
+        color: var(--text-primary);
+    }
+
+    body {
+        margin: 0;
+        background-color: var(--background);
+        color: var(--text-primary);
+        transition:
+                background-color 0.25s ease,
+                color 0.25s ease;
+    }
+
+    button,
+    input,
+    textarea,
+    select {
+        font: inherit;
+    }
+}
