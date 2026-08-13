@@ -13,6 +13,8 @@ interface Props extends PressableProps {
     variant?: StyleVariantType;
     size?: StyleSizeType;
     shape?: StyleShapeType;
+    wrap?: boolean;
+    textClassName?: string;
     fullWidth?: boolean;
     className?: string;
 }
@@ -23,6 +25,8 @@ function Button({
     size = "medium",
     shape = "rounded",
     fullWidth = false,
+    wrap = false,
+    textClassName,
     className,
     children,
     ...props
@@ -70,6 +74,7 @@ function Button({
                 BUTTON_SIZE_STYLE[size],
                 getVariantClasses(),
                 fullWidth && shape !== "circle" ? "w-full" : "",
+                wrap && "flex-1",
                 className,
             )}
             {...props}>
@@ -80,6 +85,7 @@ function Button({
                         "font-bold",
                         getTextColorClasses(),
                         size === "small" ? "text-xs" : size === "large" ? "text-base" : "text-sm",
+                        textClassName
                     )}>
                     {children}
                 </Text>
