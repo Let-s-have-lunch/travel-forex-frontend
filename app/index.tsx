@@ -1,9 +1,7 @@
-import { Text } from "react-native";
-
 function HomeScreen() {
-  return (
-      <Text>Initialization</Text>
-  )
+    return (
+        <text></text>
+    );
 }
 
 export default HomeScreen;

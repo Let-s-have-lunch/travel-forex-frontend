@@ -5,7 +5,11 @@ export default {
     darkMode: "class",
 
     // Tailwind 클래스를 사용할 경로 지정 (프로젝트 구조에 맞게 수정 가능)
-    content: ["./app/**/*.{js,jsx,ts,tsx}", "./components/**/*.{js,jsx,ts,tsx}"],
+    content: [
+        "./app/**/*.{js,jsx,ts,tsx}",
+        "./components/**/*.{js,jsx,ts,tsx}",
+        "./types/**/*.{js,jsx,ts,tsx}",
+    ],
 
     // NativeWind v4 사용 시 필요한 프리셋 설정
     presets: [require("nativewind/preset")],

@@ -1,6 +1,6 @@
 import { Slot } from "expo-router";
 import "../styles/global.css";
-import { useThemeStore } from "@/stores/theme/useThemeStore";
+import { useThemeStore } from "../stores/theme/useThemeStore";
 import { useColorScheme } from "nativewind";
 import { View } from "react-native";
 import { useEffect } from "react";
