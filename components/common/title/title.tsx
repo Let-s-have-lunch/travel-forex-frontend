@@ -13,5 +13,14 @@ interface Props {
 }
 
 function Title({
+    title,
+    showBackButton = false,
+    onBackPress,
+    children,
+    className,
+    leftIcon,
+    textClassName,
+    forceCenter = false,
+               }: Props) {
 
-               })
+}
