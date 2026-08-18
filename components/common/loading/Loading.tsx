@@ -1,7 +1,6 @@
 import React from "react";
 import { ActivityIndicator, ActivityIndicatorProps, View } from "react-native";
 import { twMerge } from "tailwind-merge";
-import { className } from "postcss-selector-parser";
 
 interface LoadingIndicatorProps extends ActivityIndicatorProps {
     fullScreen?: boolean;
@@ -11,6 +10,7 @@ function LoadingIndicator({
     fullScreen = false,
     size = "large",
     color = "#6bc1b6",
+    className,
     ...props
 }: LoadingIndicatorProps) {
     if (fullScreen) {
