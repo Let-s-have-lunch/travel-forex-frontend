@@ -1,5 +1,9 @@
 import api from "@/api/axiosInstance";
 
+/* ========================================
+   회원가입
+======================================== */
+
 export interface CreateUserRequest {
     email: string;
     password: string;
@@ -26,6 +30,29 @@ export interface CreateUserResponse {
 
 export const createUser = async (request: CreateUserRequest): Promise<CreateUserResponse> => {
     const response = await api.post<CreateUserResponse>("/users/create", request);
+
+    return response.data;
+};
+
+/* ========================================
+   로그인
+======================================== */
+
+export interface LoginUserRequest {
+    email: string;
+    password: string;
+}
+
+export interface LoginUserResponse {
+    message: string;
+    data: {
+        user: UserResponse;
+        token: string;
+    };
+}
+
+export const loginUser = async (request: LoginUserRequest): Promise<LoginUserResponse> => {
+    const response = await api.post<LoginUserResponse>("/users/login", request);
 
     return response.data;
 };
