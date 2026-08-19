@@ -5,97 +5,115 @@
 @layer base {
     :root {
         /* ===== Primary / Brand ===== */
-        --primary-main: #6bc1b6;
-        --primary-light: #a8dcd5;
-        --primary-sub: #dff3f0;
-        --primary-dark: #3fa299;
+        --primary-main: #6BC1B6;
+        --primary-light: #A8DCD5;
+        --primary-sub: #DFF3F0;
+        --primary-dark: #3FA299;
 
         /* ===== Accent ===== */
-        --accent-coral: #ff8a7a;
-        --accent-peach: #ffd9c7;
-        --accent-sky: #8abfe6;
-        --accent-lavender: #c7c3f3;
+        --accent-coral: #FF8A7A;
+        --accent-peach: #FFD9C7;
+        --accent-sky: #8ABFE6;
+        --accent-lavender: #C7C3F3;
 
         /* ===== Background / Surface ===== */
-        --background: #f7f9f8;
-        --surface: #ffffff;
-        --card: #ffffff;
+        --background: #F7F9F8;
+        --surface: #FFFFFF;
+        --card: #FFFFFF;
 
         /* ===== Border / Divider ===== */
-        --border: #e6e9e7;
-        --divider: #eceef0;
-        --disabled: #f0f2f1;
+        --border: #E6E9E7;
+        --divider: #ECEEF0;
+        --disabled: #F0F2F1;
 
         /* ===== Text ===== */
-        --text-primary: #1e2a27;
-        --text-secondary: #54615c;
-        --text-tertiary: #86918c;
-        --text-disabled: #b7c1be;
+        --text-primary: #1E2A27;
+        --text-secondary: #54615C;
+        --text-tertiary: #86918C;
+        --text-disabled: #B7C1BE;
 
         /* ===== Semantic ===== */
-        --success: #4caf7a;
-        --warning: #ffb84d;
-        --error: #ff6b6b;
-        --info: #4da3ff;
+        --success: #4CAF7A;
+        --warning: #FFB84D;
+        --error: #FF6B6B;
+        --info: #4DA3FF;
 
         /* ===== Chart ===== */
-        --chart-1: #6bc1b6;
-        --chart-2: #8abfe6;
-        --chart-3: #ffb84d;
-        --chart-4: #c7c3f3;
-        --chart-5: #ff8a7a;
-        --chart-6: #a8dcd5;
+        --chart-1: #6BC1B6;
+        --chart-2: #8ABFE6;
+        --chart-3: #FFB84D;
+        --chart-4: #C7C3F3;
+        --chart-5: #FF8A7A;
+        --chart-6: #A8DCD5;
 
         /* ===== Gradient ===== */
-        --gradient-primary: linear-gradient(135deg, #6bc1b6 0%, #a8dcd5 100%);
-        --gradient-sunset: linear-gradient(135deg, #ff8a7a 0%, #ffd9c7 100%);
+        --gradient-primary: linear-gradient(
+                135deg,
+                #6BC1B6 0%,
+                #A8DCD5 100%
+        );
+
+        --gradient-sunset: linear-gradient(
+                135deg,
+                #FF8A7A 0%,
+                #FFD9C7 100%
+        );
     }
 
     .dark {
         /* ===== Primary / Brand ===== */
-        --primary-main: #5ab0a6;
-        --primary-light: #7fd0c6;
-        --primary-sub: #2d4a45;
-        --primary-dark: #3d7f77;
+        --primary-main: #5AB0A6;
+        --primary-light: #7FD0C6;
+        --primary-sub: #2D4A45;
+        --primary-dark: #3D7F77;
 
         /* ===== Accent ===== */
-        --accent-coral: #ff8a7a;
-        --accent-peach: #ffbfa8;
-        --accent-sky: #68a8d8;
-        --accent-lavender: #a9a3e6;
+        --accent-coral: #FF8A7A;
+        --accent-peach: #FFBFA8;
+        --accent-sky: #68A8D8;
+        --accent-lavender: #A9A3E6;
 
         /* ===== Background / Surface ===== */
         --background: #121817;
-        --surface: #1a1f1d;
-        --card: #1f2825;
+        --surface: #1A1F1D;
+        --card: #1F2825;
 
         /* ===== Border / Divider ===== */
         --border: #283230;
-        --divider: #2a302f;
-        --disabled: #1a1f1d;
+        --divider: #2A302F;
+        --disabled: #1A1F1D;
 
         /* ===== Text ===== */
-        --text-primary: #f2f5f4;
-        --text-secondary: #c7d0cd;
-        --text-tertiary: #93a19c;
+        --text-primary: #F2F5F4;
+        --text-secondary: #C7D0CD;
+        --text-tertiary: #93A19C;
         --text-disabled: #657068;
 
         /* ===== Semantic ===== */
-        --success: #66d19a;
-        --warning: #ffc46b;
-        --error: #ff7b7b;
-        --info: #65b3ff;
+        --success: #66D19A;
+        --warning: #FFC46B;
+        --error: #FF7B7B;
+        --info: #65B3FF;
 
         /* ===== Chart ===== */
-        --chart-1: #5ab0a6;
-        --chart-2: #68a8d8;
-        --chart-3: #ffc46b;
-        --chart-4: #a9a3e6;
-        --chart-5: #ff8a7a;
-        --chart-6: #7fd0c6;
+        --chart-1: #5AB0A6;
+        --chart-2: #68A8D8;
+        --chart-3: #FFC46B;
+        --chart-4: #A9A3E6;
+        --chart-5: #FF8A7A;
+        --chart-6: #7FD0C6;
 
         /* ===== Gradient ===== */
-        --gradient-primary: linear-gradient(135deg, #5ab0a6 0%, #7fd0c6 100%);
-        --gradient-sunset: linear-gradient(135deg, #ff8a7a 0%, #ffbfa8 100%);
+        --gradient-primary: linear-gradient(
+                135deg,
+                #5AB0A6 0%,
+                #7FD0C6 100%
+        );
+
+        --gradient-sunset: linear-gradient(
+                135deg,
+                #FF8A7A 0%,
+                #FFBFA8 100%
+        );
     }
 }
