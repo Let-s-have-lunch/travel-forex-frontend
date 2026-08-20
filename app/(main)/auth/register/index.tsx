@@ -4,11 +4,11 @@ import { useRouter } from "expo-router";
 import { Feather } from "@expo/vector-icons";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-
 import TextComponent from "@/components/common/text/TextComponent";
-
 import Button from "@/components/common/button/Button";
-
+import Input from "@/components/common/input/Input";
+import InputGroup from "@/components/common/input/InputGroup";
+import Title from "@/components/common/title/Title";
 import { createUser } from "@/api/user/userApi";
 import { RegisterUserInputType, registerUserSchema } from "@/schemas/user/registerUserSchema";
 
@@ -22,7 +22,7 @@ export default function RegisterScreen() {
         formState: { errors, isSubmitting },
     } = useForm({
         resolver: zodResolver(registerUserSchema),
-        mode: "onTouched",
+        mode: "onTouched"
         defaultValues: {
             email: "",
             nickname: "",
@@ -45,8 +45,6 @@ export default function RegisterScreen() {
             const { confirmPassword, ...request } = data;
 
             const response = await createUser(request);
-
-            console.log("회원가입 성공:", response);
 
             if (Platform.OS === "web") {
                 window.alert("회원가입 완료\n성공적으로 회원가입 되었습니다.");
