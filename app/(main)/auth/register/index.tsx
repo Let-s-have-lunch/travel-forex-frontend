@@ -1,25 +1,18 @@
 import React, { useState } from "react";
-import {
-    View,
-    TextInput,
-    TouchableOpacity,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    Alert,
-} from "react-native";
+import { Alert, KeyboardAvoidingView, Platform, ScrollView, View } from "react-native";
 import { useRouter } from "expo-router";
 import { Feather } from "@expo/vector-icons";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import TextComponent from "@/components/common/text/TextComponent";
-import Label from "@/components/common/label/Label";
-import ErrorMessage from "@/components/common/label/ErrorMessage";
+import InputGroup from "@/components/common/input/InputGroup";
+import Input from "@/components/common/input/Input";
 import Button from "@/components/common/button/Button";
 
 import { createUser } from "@/api/user/userApi";
 import { RegisterUserInputType, registerUserSchema } from "@/schemas/user/registerUserSchema";
+import Title from "@/components/common/title/title";
 
 export default function RegisterScreen() {
     const router = useRouter();
@@ -27,9 +20,11 @@ export default function RegisterScreen() {
     const {
         control,
         handleSubmit,
-        formState: { errors },
-    } = useForm<RegisterUserInputType>({
+        setError,
+        formState: { errors, isSubmitting },
+    } = useForm({
         resolver: zodResolver(registerUserSchema),
+        mode: "onTouched",
         defaultValues: {
             email: "",
             nickname: "",
@@ -46,19 +41,14 @@ export default function RegisterScreen() {
     const [isLoading, setIsLoading] = useState(false);
 
     const handleRegister = async (data: RegisterUserInputType) => {
-        console.log("🔥 회원가입 버튼 클릭");
-        console.log("🔥 검증 성공:", data);
-
         try {
             setIsLoading(true);
-
-            console.log("🔥 회원가입 API 요청 시작");
 
             const { confirmPassword, ...request } = data;
 
             const response = await createUser(request);
 
-            console.log("🔥 회원가입 성공:", response);
+            console.log("회원가입 성공:", response);
 
             if (Platform.OS === "web") {
                 window.alert("회원가입 완료\n성공적으로 회원가입 되었습니다.");
@@ -79,8 +69,6 @@ export default function RegisterScreen() {
                 );
             }
         } catch (error: any) {
-            console.error("🔥 회원가입 오류:", error);
-
             if (error.response) {
                 const status = error.response.status;
                 const message = error.response.data?.message;
@@ -122,298 +110,196 @@ export default function RegisterScreen() {
                 keyboardShouldPersistTaps="handled"
                 showsVerticalScrollIndicator={false}>
                 <View className="px-[24px] pt-[36px]">
-                    {/* 뒤로가기 */}
-                    <TouchableOpacity
-                        onPress={() => router.back()}
-                        className="w-10 h-10 items-center justify-center mb-6"
-                        activeOpacity={0.7}>
-                        <Feather name="chevron-left" size={26} color="#86918C" />
-                    </TouchableOpacity>
-
                     {/* 타이틀 */}
-                    <View className="mb-8">
-                        <TextComponent className="text-[28px] font-bold text-text-primary">
-                            회원가입
-                        </TextComponent>
+                    <Title
+                        title="회원가입"
+                        description="여행과 자산을 한 곳에서 관리해보세요."
+                        className="h-auto px-0 py-5 mb-10"
+                        showBackButton={true}
+                    />
 
-                        <TextComponent className="text-[14px] text-text-secondary mt-2">
-                            여행과 자산을 한 곳에서 관리해보세요.
-                        </TextComponent>
-                    </View>
-
-                    <View className="gap-5">
+                    <View>
                         {/* 이메일 */}
-                        <View>
-                            <Label>이메일</Label>
-
-                            <Controller
-                                control={control}
-                                name="email"
-                                render={({ field: { onChange, value } }) => (
-                                    <View
-                                        className={`h-[54px] rounded-2xl border bg-bg-paper px-4 flex-row items-center ${
-                                            errors.email ? "border-error" : "border-divider"
-                                        }`}>
-                                        <Feather name="mail" size={19} color="#86918C" />
-
-                                        <TextInput
-                                            value={value}
-                                            onChangeText={onChange}
-                                            placeholder="이메일을 입력해주세요"
-                                            placeholderTextColor="#B7C1BE"
-                                            keyboardType="email-address"
-                                            autoCapitalize="none"
-                                            autoCorrect={false}
-                                            className="flex-1 ml-3 text-[15px] text-text-primary"
-                                        />
-                                    </View>
-                                )}
-                            />
-
-                            {errors.email && <ErrorMessage>{errors.email.message}</ErrorMessage>}
-                        </View>
+                        <Controller
+                            control={control}
+                            name="email"
+                            render={({ field: { onChange, onBlur, value } }) => (
+                                <InputGroup
+                                    label="이메일"
+                                    size="small"
+                                    errorMessage={errors.email?.message}
+                                    keyboardType="email-address"
+                                    autoCapitalize="none"
+                                    onBlur={onBlur}
+                                    autoCorrect={false}
+                                    placeholder="이메일을 입력해주세요"
+                                    value={value}
+                                    onChangeText={onChange}
+                                />
+                            )}
+                        />
 
                         {/* 닉네임 */}
-                        <View>
-                            <Label>닉네임</Label>
-
-                            <Controller
-                                control={control}
-                                name="nickname"
-                                render={({ field: { onChange, value } }) => (
-                                    <View
-                                        className={`h-[54px] rounded-2xl border bg-bg-paper px-4 flex-row items-center ${
-                                            errors.nickname ? "border-error" : "border-divider"
-                                        }`}>
-                                        <Feather name="user" size={19} color="#86918C" />
-
-                                        <TextInput
-                                            value={value}
-                                            onChangeText={onChange}
-                                            placeholder="닉네임을 입력해주세요"
-                                            placeholderTextColor="#B7C1BE"
-                                            autoCapitalize="none"
-                                            className="flex-1 ml-3 text-[15px] text-text-primary"
-                                        />
-                                    </View>
-                                )}
-                            />
-
-                            {errors.nickname && (
-                                <ErrorMessage>{errors.nickname.message}</ErrorMessage>
+                        <Controller
+                            control={control}
+                            name="nickname"
+                            render={({ field: { onChange, onBlur, value } }) => (
+                                <InputGroup
+                                    label="닉네임"
+                                    size="small"
+                                    errorMessage={errors.nickname?.message}
+                                    autoCapitalize="none"
+                                    onBlur={onBlur}
+                                    placeholder="닉네임을 입력해주세요"
+                                    value={value}
+                                    onChangeText={onChange}
+                                />
                             )}
-                        </View>
+                        />
 
                         {/* 생년월일 */}
-                        <View>
-                            <Label>생년월일</Label>
-
-                            <Controller
-                                control={control}
-                                name="birthdate"
-                                render={({ field: { onChange, value } }) => (
-                                    <View
-                                        className={`h-[54px] rounded-2xl border bg-bg-paper px-4 flex-row items-center ${
-                                            errors.birthdate ? "border-error" : "border-divider"
-                                        }`}>
-                                        <Feather name="calendar" size={19} color="#86918C" />
-
-                                        <TextInput
-                                            value={value}
-                                            onChangeText={onChange}
-                                            placeholder="YYYY-MM-DD"
-                                            placeholderTextColor="#B7C1BE"
-                                            keyboardType="numbers-and-punctuation"
-                                            maxLength={10}
-                                            className="flex-1 ml-3 text-[15px] text-text-primary"
-                                        />
-                                    </View>
-                                )}
-                            />
-
-                            {errors.birthdate && (
-                                <ErrorMessage>{errors.birthdate.message}</ErrorMessage>
+                        <Controller
+                            control={control}
+                            name="birthdate"
+                            render={({ field: { onChange, onBlur, value } }) => (
+                                <InputGroup
+                                    label="생년월일"
+                                    size="small"
+                                    errorMessage={errors.birthdate?.message}
+                                    placeholder="YYYY-MM-DD"
+                                    keyboardType="numbers-and-punctuation"
+                                    onBlur={onBlur}
+                                    maxLength={10}
+                                    value={value}
+                                    onChangeText={onChange}
+                                />
                             )}
-                        </View>
+                        />
 
                         {/* 전화번호 */}
-                        <View>
-                            <Label>전화번호</Label>
-
-                            <Controller
-                                control={control}
-                                name="phoneNumber"
-                                render={({ field: { onChange, value } }) => (
-                                    <View
-                                        className={`h-[54px] rounded-2xl border bg-bg-paper px-4 flex-row items-center ${
-                                            errors.phoneNumber ? "border-error" : "border-divider"
-                                        }`}>
-                                        <Feather name="phone" size={19} color="#86918C" />
-
-                                        <TextInput
-                                            value={value}
-                                            onChangeText={onChange}
-                                            placeholder="전화번호를 입력해주세요"
-                                            placeholderTextColor="#B7C1BE"
-                                            keyboardType="phone-pad"
-                                            className="flex-1 ml-3 text-[15px] text-text-primary"
-                                        />
-                                    </View>
-                                )}
-                            />
-
-                            {errors.phoneNumber && (
-                                <ErrorMessage>{errors.phoneNumber.message}</ErrorMessage>
+                        <Controller
+                            control={control}
+                            name="phoneNumber"
+                            render={({ field: { onChange, onBlur, value } }) => (
+                                <InputGroup
+                                    label="전화번호"
+                                    size="small"
+                                    errorMessage={errors.phoneNumber?.message}
+                                    placeholder="전화번호를 입력해주세요"
+                                    keyboardType="phone-pad"
+                                    onBlur={onBlur}
+                                    value={value}
+                                    onChangeText={onChange}
+                                />
                             )}
-                        </View>
+                        />
 
                         {/* 비밀번호 */}
-                        <View>
-                            <Label>비밀번호</Label>
-
-                            <Controller
-                                control={control}
-                                name="password"
-                                render={({ field: { onChange, value } }) => (
-                                    <View
-                                        className={`h-[54px] rounded-2xl border bg-bg-paper px-4 flex-row items-center ${
-                                            errors.password ? "border-error" : "border-divider"
-                                        }`}>
-                                        <Feather name="lock" size={19} color="#86918C" />
-
-                                        <TextInput
+                        <Controller
+                            control={control}
+                            name="password"
+                            render={({ field: { onChange, onBlur, value } }) => (
+                                <InputGroup
+                                    label="비밀번호"
+                                    size="small"
+                                    onBlur={onBlur}
+                                    errorMessage={errors.password?.message}>
+                                    <View className="relative">
+                                        <Input
                                             value={value}
                                             onChangeText={onChange}
                                             placeholder="비밀번호를 입력해주세요"
-                                            placeholderTextColor="#B7C1BE"
                                             secureTextEntry={!showPassword}
                                             autoCapitalize="none"
                                             autoCorrect={false}
-                                            className="flex-1 ml-3 text-[15px] text-text-primary"
+                                            hasError={!!errors.password}
+                                            className="pr-10"
                                         />
 
-                                        <TouchableOpacity
-                                            onPress={() => setShowPassword(prev => !prev)}
-                                            activeOpacity={0.7}>
+                                        <View className="absolute right-4 top-0 bottom-0 justify-center">
                                             <Feather
                                                 name={showPassword ? "eye" : "eye-off"}
                                                 size={19}
-                                                color="#86918C"
+                                                className="text-text-secondary"
+                                                onPress={() => setShowPassword(prev => !prev)}
                                             />
-                                        </TouchableOpacity>
+                                        </View>
                                     </View>
-                                )}
-                            />
-
-                            {errors.password && (
-                                <ErrorMessage>{errors.password.message}</ErrorMessage>
+                                </InputGroup>
                             )}
-                        </View>
+                        />
 
                         {/* 비밀번호 확인 */}
-                        <View>
-                            <Label>비밀번호 확인</Label>
-
-                            <Controller
-                                control={control}
-                                name="confirmPassword"
-                                render={({ field: { onChange, value } }) => (
-                                    <View
-                                        className={`h-[54px] rounded-2xl border bg-bg-paper px-4 flex-row items-center ${
-                                            errors.confirmPassword
-                                                ? "border-error"
-                                                : "border-divider"
-                                        }`}>
-                                        <Feather name="lock" size={19} color="#86918C" />
-
-                                        <TextInput
+                        <Controller
+                            control={control}
+                            name="confirmPassword"
+                            render={({ field: { onChange, onBlur, value } }) => (
+                                <InputGroup
+                                    label="비밀번호 확인"
+                                    size="small"
+                                    onBlur={onBlur}
+                                    errorMessage={errors.confirmPassword?.message}>
+                                    <View className="relative">
+                                        <Input
                                             value={value}
                                             onChangeText={onChange}
                                             placeholder="비밀번호를 다시 입력해주세요"
-                                            placeholderTextColor="#B7C1BE"
                                             secureTextEntry={!showPasswordConfirm}
                                             autoCapitalize="none"
-                                            className="flex-1 ml-3 text-[15px] text-text-primary"
+                                            autoCorrect={false}
+                                            hasError={!!errors.confirmPassword}
+                                            className="pr-10"
                                         />
 
-                                        <TouchableOpacity
-                                            onPress={() => setShowPasswordConfirm(prev => !prev)}
-                                            activeOpacity={0.7}>
+                                        <View className="absolute right-4 top-0 bottom-0 justify-center">
                                             <Feather
                                                 name={showPasswordConfirm ? "eye" : "eye-off"}
                                                 size={19}
-                                                color="#86918C"
+                                                className="text-text-secondary"
+                                                onPress={() =>
+                                                    setShowPasswordConfirm(prev => !prev)
+                                                }
                                             />
-                                        </TouchableOpacity>
+                                        </View>
                                     </View>
-                                )}
-                            />
-
-                            {errors.confirmPassword && (
-                                <ErrorMessage>{errors.confirmPassword.message}</ErrorMessage>
+                                </InputGroup>
                             )}
-                        </View>
+                        />
 
                         {/* 성별 */}
-                        <View>
-                            <Label>성별</Label>
-
+                        <InputGroup label="성별" size="small" errorMessage={errors.gender?.message}>
                             <Controller
                                 control={control}
                                 name="gender"
                                 render={({ field: { onChange, value } }) => (
                                     <View className="flex-row gap-3">
-                                        {/* 남성 */}
-                                        <TouchableOpacity
-                                            onPress={() => onChange("MALE")}
-                                            activeOpacity={0.8}
-                                            className={`flex-1 h-[54px] rounded-2xl border items-center justify-center ${
-                                                value === "MALE"
-                                                    ? "border-primary-main bg-primary-main"
-                                                    : errors.gender
-                                                      ? "border-error bg-bg-paper"
-                                                      : "border-divider bg-bg-paper"
-                                            }`}>
-                                            <TextComponent
-                                                className={`text-[15px] font-semibold ${
-                                                    value === "MALE"
-                                                        ? "text-surface"
-                                                        : "text-text-primary"
-                                                }`}>
-                                                남성
-                                            </TextComponent>
-                                        </TouchableOpacity>
+                                        <Button
+                                            variant={value === "MALE" ? "contained" : "outlined"}
+                                            color="primary"
+                                            size="large"
+                                            shape="rounded"
+                                            wrap
+                                            onPress={() => onChange("MALE")}>
+                                            남성
+                                        </Button>
 
-                                        {/* 여성 */}
-                                        <TouchableOpacity
-                                            onPress={() => onChange("FEMALE")}
-                                            activeOpacity={0.8}
-                                            className={`flex-1 h-[54px] rounded-2xl border items-center justify-center ${
-                                                value === "FEMALE"
-                                                    ? "border-primary-main bg-primary-main"
-                                                    : errors.gender
-                                                      ? "border-error bg-bg-paper"
-                                                      : "border-divider bg-bg-paper"
-                                            }`}>
-                                            <TextComponent
-                                                className={`text-[15px] font-semibold ${
-                                                    value === "FEMALE"
-                                                        ? "text-surface"
-                                                        : "text-text-primary"
-                                                }`}>
-                                                여성
-                                            </TextComponent>
-                                        </TouchableOpacity>
+                                        <Button
+                                            variant={value === "FEMALE" ? "contained" : "outlined"}
+                                            color="primary"
+                                            size="large"
+                                            shape="rounded"
+                                            wrap
+                                            onPress={() => onChange("FEMALE")}>
+                                            여성
+                                        </Button>
                                     </View>
                                 )}
                             />
-
-                            {errors.gender && <ErrorMessage>{errors.gender.message}</ErrorMessage>}
-                        </View>
+                        </InputGroup>
                     </View>
 
                     {/* 회원가입 버튼 */}
-                    <View className="mt-8">
+                    <View className="mt-5">
                         <Button
                             color="primary"
                             variant="contained"
@@ -433,13 +319,15 @@ export default function RegisterScreen() {
                             이미 회원이신가요?
                         </TextComponent>
 
-                        <TouchableOpacity
+                        <Button
+                            variant="text"
+                            color="primary"
+                            size="small"
                             onPress={() => router.push("/auth/login")}
-                            activeOpacity={0.7}>
-                            <TextComponent className="text-[13px] font-bold text-primary-main ml-1">
-                                로그인
-                            </TextComponent>
-                        </TouchableOpacity>
+                            className="p-0 ml-1"
+                            textClassName="text-[13px]">
+                            로그인
+                        </Button>
                     </View>
                 </View>
             </ScrollView>
