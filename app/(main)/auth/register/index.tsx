@@ -4,15 +4,13 @@ import { useRouter } from "expo-router";
 import { Feather } from "@expo/vector-icons";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-
 import TextComponent from "@/components/common/text/TextComponent";
-import InputGroup from "@/components/common/input/InputGroup";
-import Input from "@/components/common/input/Input";
 import Button from "@/components/common/button/Button";
-
+import Input from "@/components/common/input/Input";
+import InputGroup from "@/components/common/input/InputGroup";
+import Title from "@/components/common/title/Title";
 import { createUser } from "@/api/user/userApi";
 import { RegisterUserInputType, registerUserSchema } from "@/schemas/user/registerUserSchema";
-import Title from "@/components/common/title/Title";
 
 export default function RegisterScreen() {
     const router = useRouter();
