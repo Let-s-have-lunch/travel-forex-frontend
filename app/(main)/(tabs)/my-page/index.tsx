@@ -20,8 +20,10 @@ import Button from "@/components/common/button/Button";
 
 import { loginUser } from "@/api/user/userApi";
 import { LoginUserInputType, loginUserSchema } from "@/schemas/user/loginUserSchema";
+import { useAuthStore } from "@/stores/auth/useAuthStore";
 
 export default function LoginScreen() {
+    const { login } = useAuthStore();
     const router = useRouter();
 
     const [showPassword, setShowPassword] = useState(false);
@@ -53,6 +55,13 @@ export default function LoginScreen() {
             console.log("③ 로그인 API 요청 시작");
 
             const response = await loginUser(data);
+
+            if (response?.user && response?.token) {
+                login(response.user, response.token);
+                console.log("✅ Zustand 로그인 저장 완료!");
+            } else {
+                console.warn("⚠️ user 또는 token이 응답에 없습니다:", response);
+            }
 
             console.log("④ 로그인 API 응답 성공");
             console.log("로그인 응답:", response);
