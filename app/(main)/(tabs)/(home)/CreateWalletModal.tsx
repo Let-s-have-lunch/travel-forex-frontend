@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import {useEffect, useState } from "react";
 import {
     View,
     TouchableOpacity,
@@ -45,6 +45,8 @@ export default function CreateWalletModal({ visible, onClose, onSuccess }: Creat
             onSuccess();
             onClose();
         } catch (error: any) {
+            console.log(error);
+
             const errorMsg = error?.response?.data?.message || "지갑 등록에 실패했습니다.";
             if (Platform.OS === "web") {
                 window.alert(errorMsg);

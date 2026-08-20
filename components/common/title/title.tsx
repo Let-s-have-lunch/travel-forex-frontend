@@ -19,16 +19,16 @@ interface Props {
 }
 
 function Title({
-    title,
-    showBackButton = false,
-    onBackPress,
-    description,
-    children,
-    className,
-    leftIcon,
-    textClassName,
-    forceCenter = false,
-}: Props) {
+                   title,
+                   showBackButton = false,
+                   onBackPress,
+                   description,
+                   children,
+                   className,
+                   leftIcon,
+                   textClassName,
+                   forceCenter = false,
+               }: Props) {
     const isCentered = showBackButton || forceCenter;
 
     return (
