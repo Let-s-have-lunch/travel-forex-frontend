@@ -18,8 +18,7 @@ export default function RegisterScreen() {
     const {
         control,
         handleSubmit,
-        setError,
-        formState: { errors, isSubmitting },
+        formState: { errors },
     } = useForm({
         resolver: zodResolver(registerUserSchema),
         mode: "onTouched",
