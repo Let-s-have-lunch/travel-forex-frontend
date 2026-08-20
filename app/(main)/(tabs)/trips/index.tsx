@@ -2,7 +2,6 @@ import { useCallback, useEffect, useState } from "react";
 import TextComponent from "@/components/common/text/TextComponent";
 import { Alert, FlatList, Platform, TouchableOpacity, View } from "react-native";
 import LoadingIndicator from "@/components/common/loading/Loading";
-import Pagination from "@/components/common/pagination/Pagination";
 import Button from "@/components/common/button/Button";
 import { Feather } from "@expo/vector-icons";
 import Card from "@/components/common/card/Card";
@@ -10,6 +9,8 @@ import Title from "@/components/common/title/title";
 import { Trip } from "@/types/trip";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import tripApi from "@/api/user/tripApi";
+import { TripInputType } from "@/schema/tripSchema";
+import TripFormModal from "@/components/domain/trips/TripFormModal";
 
 type TabType = "ONGOING" | "PAST";
 
@@ -20,19 +21,20 @@ export default function TripListPage({ navigation }: any) {
     const [total, setTotal] = useState(0);
     const [activeTab, setActiveTab] = useState<TabType>("ONGOING");
 
+    // 폼 모달 관련 상태
+    const [isFormVisible, setIsFormVisible] = useState(false);
+    const [editingTrip, setEditingTrip] = useState<Trip | null>(null);
+
     const { page, size } = useLocalSearchParams<{ page: string; size: string }>();
     const currentPage = Number(page) || 1;
     const pageSize = Number(size) || 5;
-
     const totalPage = Math.ceil(total / pageSize) || 1;
 
     const fetchTrips = useCallback(
         async (targetPage: number, targetSize: number) => {
-            setLoading(true); // 통신 시작 전 로딩 상태 켜기
+            setLoading(true);
             try {
-                // 완성된 tripApi를 통해 데이터 호출
                 const result = await tripApi.fetchTripList(targetPage, targetSize);
-
                 setTrips(result.list);
                 setTotal(result.total);
             } catch (error) {
@@ -55,40 +57,76 @@ export default function TripListPage({ navigation }: any) {
         fetchTrips(currentPage, pageSize).then(() => {});
     }, [currentPage, fetchTrips, pageSize]);
 
-    // 날짜 차이 계산 함수 (예: 20일 ~ 25일 -> 6일)
+    // 삭제 API 호출 로직
+    const handleDeleteTrip = async (id: number) => {
+        // TODO: 실제 tripApi.deleteTrip(id) 호출 로직 연결
+        console.log(`${id}번 여행 삭제 API 쏘기`);
+        // await tripApi.deleteTrip(id);
+        // fetchTrips(currentPage, pageSize);
+    };
+
+    // 옵션 메뉴 열기 (수정 / 삭제)
+    const handleMoreOption = (trip: Trip) => {
+        Alert.alert("여행 관리", "원하시는 작업을 선택해주세요.", [
+            {
+                text: "수정",
+                onPress: () => {
+                    setEditingTrip(trip);
+                    setIsFormVisible(true);
+                },
+            },
+            {
+                text: "삭제",
+                onPress: () => handleDeleteTrip(trip.id),
+                style: "destructive", // iOS에서 빨간색으로 표시됨
+            },
+            {
+                text: "취소",
+                style: "cancel",
+            },
+        ]);
+    };
+
+    // 폼 저장 시 처리 로직
+    const handleSaveTrip = async (data: TripInputType) => {
+        if (editingTrip) {
+            console.log("수정 API 쏘기", data);
+            // await tripApi.updateTrip(editingTrip.id, data);
+        } else {
+            console.log("생성 API 쏘기", data);
+            // await tripApi.createTrip(data);
+        }
+        // 저장 후 목록 리프레시
+        fetchTrips(currentPage, pageSize);
+    };
+
     const calculateDays = (start: string, end: string) => {
         const startDate = new Date(start);
         const endDate = new Date(end);
         const diffTime = Math.abs(endDate.getTime() - startDate.getTime());
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        return diffDays + 1; // 여행 일수는 당일 포함이므로 +1을 해줍니다.
+        return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
     };
 
-    // 금액 포맷팅 함수
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat("ko-KR").format(amount);
     };
 
-    // 여행 아이템 렌더링
     const renderTripItem = ({ item }: { item: Trip }) => {
         const days = calculateDays(item.startDate, item.endDate);
         const formattedStart = item.startDate.replace(/-/g, ".");
-        const formattedEnd = item.endDate.slice(5).replace(/-/g, "."); // 08-25 -> 08.25
+        const formattedEnd = item.endDate.slice(5).replace(/-/g, ".");
 
         return (
             <TouchableOpacity activeOpacity={0.8} onPress={() => router.push(`/trips/${item.id}`)}>
-                <Card className="flex-row items-center p-4">
-                    {/* 좌측 썸네일 이미지 */}
-                    <View className="w-16 h-16 rounded-2xl bg-primary-sub mr-4 overflow-hidden">
-                        {/* <Image source={{ uri: '...' }} className="w-full h-full" resizeMode="cover" /> */}
-                    </View>
+                <Card className="flex-row items-center p-4 relative mb-4">
+                    {/* 좌측 썸네일 */}
+                    <View className="w-16 h-16 rounded-2xl bg-primary-sub mr-4 overflow-hidden" />
 
                     {/* 우측 텍스트 정보 */}
-                    <View className="flex-1 justify-center gap-1">
+                    <View className="flex-1 justify-center gap-1 pr-6">
                         <TextComponent className="text-lg font-bold text-text-primary">
                             {item.title}
                         </TextComponent>
-
                         <TextComponent className="text-xs text-text-tertiary">
                             {`${formattedStart} ~ ${formattedEnd} (${days}일)`}
                         </TextComponent>
@@ -106,6 +144,13 @@ export default function TripListPage({ navigation }: any) {
                             </TextComponent>
                         </View>
                     </View>
+
+                    {/* 더보기 (수정/삭제) 메뉴 버튼 - 파란색 점 3개 자리! */}
+                    <TouchableOpacity
+                        className="absolute top-4 right-2 p-2"
+                        onPress={() => handleMoreOption(item)}>
+                        <Feather name="more-vertical" size={20} color="#888" />
+                    </TouchableOpacity>
                 </Card>
             </TouchableOpacity>
         );
@@ -115,13 +160,20 @@ export default function TripListPage({ navigation }: any) {
         <View className="flex-1 bg-background">
             <Title title="여행 목록" showBackButton={true} onBackPress={() => router.back()}>
                 <View className="flex-1 flex-row justify-end pr-2">
-                    <Button variant="outlined" shape="circle" size="small">
+                    <Button
+                        variant="outlined"
+                        shape="circle"
+                        size="small"
+                        onPress={() => {
+                            setEditingTrip(null); // 추가 모드
+                            setIsFormVisible(true);
+                        }}>
                         <Feather name="plus" size={20} color="#6BC1B6" />
                     </Button>
                 </View>
             </Title>
 
-            {/* 탭 메뉴 */}
+            {/* 탭 및 리스트 렌더링 영역 (기존과 동일하여 생략/유지) */}
             <View className="flex-row px-5 py-4 gap-2">
                 <Button
                     wrap
@@ -131,7 +183,6 @@ export default function TripListPage({ navigation }: any) {
                     onPress={() => {
                         setActiveTab("ONGOING");
                         router.setParams({ page: "1" });
-
                     }}
                     className={activeTab === "ONGOING" ? "" : "border-border bg-surface"}
                     textClassName={activeTab === "ONGOING" ? "" : "text-text-tertiary"}>
@@ -152,7 +203,6 @@ export default function TripListPage({ navigation }: any) {
                 </Button>
             </View>
 
-            {/* 리스트 영역 */}
             {loading ? (
                 <LoadingIndicator />
             ) : (
@@ -162,29 +212,16 @@ export default function TripListPage({ navigation }: any) {
                     renderItem={renderTripItem}
                     contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 20 }}
                     showsVerticalScrollIndicator={false}
-                    ListEmptyComponent={
-                        <View className="py-20 items-center justify-center">
-                            <TextComponent className="text-text-tertiary">
-                                등록된 여행 일정이 없습니다.
-                            </TextComponent>
-                        </View>
-                    }
-                    ListFooterComponent={
-                        trips.length > 0 ? (
-                            <Pagination
-                                currentPage={currentPage}
-                                totalPages={totalPage}
-                                onPageChange={newPage =>
-                                    router.setParams({
-                                        page: String(newPage),
-                                        size: String(pageSize),
-                                    })
-                                }
-                            />
-                        ) : null
-                    }
                 />
             )}
+
+            {/* 추가 및 수정을 위한 모달 컴포넌트 */}
+            <TripFormModal
+                visible={isFormVisible}
+                initialData={editingTrip}
+                onClose={() => setIsFormVisible(false)}
+                onSubmit={handleSaveTrip}
+            />
         </View>
     );
 }
