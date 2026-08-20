@@ -18,12 +18,11 @@ import { Feather } from "@expo/vector-icons";
 import Button from "@/components/common/button/Button";
 import InputGroup from "@/components/common/input/InputGroup";
 import Input from "@/components/common/input/Input";
-import Title from "@/components/common/title/Title";
 import TextComponent from "@/components/common/text/TextComponent";
 
-// 스키마 경로 및 타입 (실제 프로젝트 경로에 맞게 수정)
 import { tripSchema, TripInputType } from "@/schemas/trip/tripSchema";
 import { Trip } from "@/types/trip";
+import Title from "@/components/common/title/title";
 
 interface TripFormModalProps {
     visible: boolean;
@@ -51,6 +50,7 @@ export default function TripFormModal({
         formState: { errors, isSubmitting },
     } = useForm<TripInputType>({
         resolver: zodResolver(tripSchema),
+        mode: "onBlur",
         defaultValues: {
             title: "",
             startDate: "",
@@ -79,7 +79,15 @@ export default function TripFormModal({
             await onSubmit(data); // 부모 컴포넌트(TripListPage)에서 API 통신 및 리프레시 처리
             onClose();
         } catch (error) {
-            Alert.alert("오류", "저장 중 문제가 발생했습니다.");
+            console.log(error);
+
+            const errorKeyword = isEditMode ? "수정" : "저장";
+
+            if (Platform.OS === "web") {
+                alert(`${errorKeyword} 중 문제가 발생했습니다.`);
+            } else {
+                Alert.alert("오류", `${errorKeyword} 중 문제가 발생했습니다.`);
+            }
         }
     };
 
@@ -100,7 +108,7 @@ export default function TripFormModal({
                     type="date"
                     value={value}
                     onChange={e => onChange(e.target.value)}
-                    className={`w-full px-3 h-11 bg-bg-paper border rounded-md text-[14px] text-text-primary outline-none ${
+                    className={`w-full px-4 py-4 bg-bg-paper border rounded-md text-sm text-text-primary outline-none ${
                         errorMessage ? "border-accent-coral" : "border-divider"
                     }`}
                     style={{ fontFamily: "inherit" }}
@@ -115,11 +123,11 @@ export default function TripFormModal({
                 <TouchableOpacity
                     activeOpacity={0.7}
                     onPress={() => setShowPicker(true)}
-                    className={`w-full flex-row items-center rounded-md bg-bg-paper border px-3 h-11 ${
+                    className={`w-full flex-row items-center rounded-md bg-bg-paper border px-4 py-4 ${
                         errorMessage ? "border-accent-coral" : "border-divider"
                     }`}>
                     <TextComponent
-                        className={`flex-1 ${value ? "text-text-primary" : "text-[#B7C1BE]"}`}>
+                        className={`flex-1 text-sm ${value ? "text-text-primary" : "text-[#B7C1BE]"}`}>
                         {displayDate}
                     </TextComponent>
                     <Feather name="calendar" size={18} color="#6BC1B6" />
@@ -145,14 +153,17 @@ export default function TripFormModal({
             <KeyboardAvoidingView
                 behavior={Platform.OS === "ios" ? "padding" : "height"}
                 style={{ flex: 1 }}>
-                {/* 바깥 영역 클릭 시 키보드 닫기 */}
+                {/* 바깥 영역 클릭 시 키보드 닫기 및 모달 종료 */}
                 <Pressable
-                    onPress={Keyboard.dismiss}
+                    onPress={() => {
+                        Keyboard.dismiss();
+                        onClose();
+                    }}
                     className="flex-1 justify-center items-center bg-black/50 p-6">
                     {/* 모달 컨텐츠 영역 (클릭해도 닫히지 않도록 stopPropagation 처리) */}
                     <Pressable
                         onPress={e => e.stopPropagation()}
-                        className="bg-bg-default w-full max-w-xl rounded-3xl p-6 shadow-xl">
+                        className="bg-surface w-full max-w-xl rounded-3xl p-6 shadow-xl">
                         <Title
                             title={isEditMode ? "여행지 수정" : "여행지 추가"}
                             className="h-auto pb-6 mb-2"
@@ -218,25 +229,23 @@ export default function TripFormModal({
                                     label="총 예산 (원화)"
                                     errorMessage={errors.budgetKrw?.message}>
                                     <View
-                                        className={`w-full flex-row items-center rounded-md bg-bg-paper border px-3 h-11 ${
+                                        className={`w-full flex-row items-center rounded-md bg-bg-paper border px-4 py-4 ${
                                             errors.budgetKrw
                                                 ? "border-accent-coral"
                                                 : "border-divider"
                                         }`}>
-                                        <TextComponent className="text-text-primary font-bold mr-2">
+                                        <TextComponent className="text-text-primary font-bold mr-2 text-sm">
                                             ₩
                                         </TextComponent>
                                         <Input
                                             hideBorder
-                                            className="flex-1 p-0 m-0"
+                                            className="flex-1 p-0 m-0 text-sm"
                                             keyboardType="numeric"
                                             onBlur={onBlur}
                                             onChangeText={text => {
-                                                // 숫자 이외의 문자 제거 후 저장
                                                 const num = Number(text.replace(/[^0-9]/g, ""));
                                                 onChange(num);
                                             }}
-                                            // 화면 표시용으로 콤마 찍기
                                             value={
                                                 value
                                                     ? new Intl.NumberFormat("ko-KR").format(value)
@@ -249,6 +258,12 @@ export default function TripFormModal({
                             )}
                         />
 
+                        {errors.root?.message && (
+                            <TextComponent className="text-error text-center text-sm mt-1 mb-2">
+                                {errors.root.message}
+                            </TextComponent>
+                        )}
+
                         {/* 5. 하단 버튼 영역 */}
                         <View className="flex-row mt-6 gap-3">
                             <Button variant="outlined" wrap={true} onPress={onClose}>
@@ -259,7 +274,7 @@ export default function TripFormModal({
                                 wrap={true}
                                 onPress={handleSubmit(handleFormSubmit)}
                                 disabled={isSubmitting}>
-                                {isSubmitting ? "처리중..." : isEditMode ? "수정" : "저장하기"}
+                                {isSubmitting ? "처리중..." : isEditMode ? "수정" : "저장"}
                             </Button>
                         </View>
                     </Pressable>

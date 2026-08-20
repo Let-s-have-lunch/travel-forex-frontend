@@ -9,8 +9,8 @@ import Title from "@/components/common/title/title";
 import { Trip } from "@/types/trip";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import tripApi from "@/api/user/tripApi";
-import { TripInputType } from "@/schema/tripSchema";
 import TripFormModal from "@/components/domain/trips/TripFormModal";
+import { TripInputType } from "@/schemas/trip/tripSchema";
 
 type TabType = "ONGOING" | "PAST";
 
@@ -90,14 +90,12 @@ export default function TripListPage({ navigation }: any) {
     // 폼 저장 시 처리 로직
     const handleSaveTrip = async (data: TripInputType) => {
         if (editingTrip) {
-            console.log("수정 API 쏘기", data);
-            // await tripApi.updateTrip(editingTrip.id, data);
+            await tripApi.updateTrip(editingTrip.id, data);
         } else {
-            console.log("생성 API 쏘기", data);
-            // await tripApi.createTrip(data);
+            await tripApi.createTrip(data);
         }
         // 저장 후 목록 리프레시
-        fetchTrips(currentPage, pageSize);
+        await fetchTrips(currentPage, pageSize);
     };
 
     const calculateDays = (start: string, end: string) => {
