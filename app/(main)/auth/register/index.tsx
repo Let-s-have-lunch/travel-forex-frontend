@@ -110,12 +110,26 @@ export default function RegisterScreen() {
                 keyboardShouldPersistTaps="handled"
                 showsVerticalScrollIndicator={false}>
                 <View className="px-[24px] pt-[36px]">
+                    {/* ========================================
+                        뒤로가기
+                    ======================================== */}
+
+                    <Button
+                        variant="icon"
+                        color="primary"
+                        size="small"
+                        shape="circle"
+                        onPress={() => router.back()}
+                        className="w-[30px] h-[40px] p-0 bg-[#F1F3F2]">
+                        <Feather name="chevron-left" size={26} color="#3F4643" />
+                    </Button>
+
                     {/* 타이틀 */}
                     <Title
                         title="회원가입"
                         description="여행과 자산을 한 곳에서 관리해보세요."
-                        className="h-auto px-0 py-5 mb-10"
-                        showBackButton={true}
+                        className="h-auto px-0 items-start py-5 mb-8"
+                        textClassName="text-[28px]"
                     />
 
                     <View>

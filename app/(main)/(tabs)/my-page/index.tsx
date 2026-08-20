@@ -1,7 +1,6 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
     View,
-    TextInput,
     TouchableOpacity,
     KeyboardAvoidingView,
     Platform,
@@ -14,13 +13,14 @@ import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import TextComponent from "@/components/common/text/TextComponent";
-import Label from "@/components/common/label/Label";
-import ErrorMessage from "@/components/common/label/ErrorMessage";
+import InputGroup from "@/components/common/input/InputGroup";
+import Input from "@/components/common/input/Input";
 import Button from "@/components/common/button/Button";
 
 import { loginUser } from "@/api/user/userApi";
 import { LoginUserInputType, loginUserSchema } from "@/schemas/user/loginUserSchema";
 import { useAuthStore } from "@/stores/auth/useAuthStore";
+import Title from "@/components/common/title/Title";
 
 export default function LoginScreen() {
     const { login } = useAuthStore();
@@ -35,6 +35,7 @@ export default function LoginScreen() {
         formState: { errors },
     } = useForm<LoginUserInputType>({
         resolver: zodResolver(loginUserSchema),
+        mode: "onBlur",
         defaultValues: {
             email: "",
             password: "",
@@ -46,38 +47,22 @@ export default function LoginScreen() {
     ======================================== */
 
     const handleLogin = async (data: LoginUserInputType) => {
-        console.log("① 로그인 버튼 클릭");
-        console.log("② Zod 검증 성공");
-
         try {
             setIsLoading(true);
-
-            console.log("③ 로그인 API 요청 시작");
 
             const response = await loginUser(data);
 
             if (response?.user && response?.token) {
                 login(response.user, response.token);
-                console.log("✅ Zustand 로그인 저장 완료!");
             } else {
                 console.warn("⚠️ user 또는 token이 응답에 없습니다:", response);
             }
 
-            console.log("④ 로그인 API 응답 성공");
-            console.log("로그인 응답:", response);
-
-            console.log("⑤ 홈 화면으로 이동");
-
             router.replace("/");
         } catch (error: any) {
-            console.error("❌ 로그인 오류:", error);
-
             if (error.response) {
                 const status = error.response.status;
                 const message = error.response.data?.message;
-
-                console.log("❌ 서버 상태 코드:", status);
-                console.log("❌ 서버 응답:", error.response.data);
 
                 if (status === 401) {
                     Alert.alert(
@@ -132,94 +117,88 @@ export default function LoginScreen() {
                 }}
                 keyboardShouldPersistTaps="handled"
                 showsVerticalScrollIndicator={false}>
-                <View className="flex-1 px-[24px] pt-[28px]">
+                <View className="flex-1 px-[20px] pt-[28px]">
                     {/* ========================================
                         뒤로가기
                     ======================================== */}
 
-                    <TouchableOpacity
-                        className="w-[40px] h-[40px] items-center justify-center"
-                        activeOpacity={0.7}
-                        onPress={() => router.back()}>
-                        <Feather name="chevron-left" size={30} color="#3F4643" />
-                    </TouchableOpacity>
+                    <Button
+                        variant="icon"
+                        color="primary"
+                        size="small"
+                        shape="circle"
+                        onPress={() => router.back()}
+                        className="w-[30px] h-[40px] p-0 bg-[#F1F3F2]">
+                        <Feather name="chevron-left" size={26} color="#3F4643" />
+                    </Button>
 
                     {/* ========================================
                         제목
                     ======================================== */}
 
-                    <View className="mt-8">
-                        <TextComponent className="text-[32px] font-bold text-text-primary">
-                            로그인
-                        </TextComponent>
-
-                        <TextComponent className="mt-2 text-[15px] text-text-secondary">
-                            여행을 더 스마트하게 관리해보세요.
-                        </TextComponent>
+                    <View className="mt-5">
+                        <Title
+                            title="로그인"
+                            description="여행을 더 스마트하게 관리해보세요."
+                            className="h-auto px-0 items-start"
+                            textClassName="text-[28px]"
+                        />
                     </View>
 
                     {/* ========================================
                         입력 영역
                     ======================================== */}
 
-                    <View className="mt-12 gap-6">
+                    <View className="mt-12">
                         {/* 이메일 */}
-                        <View>
-                            <Label>이메일</Label>
-
+                        <InputGroup
+                            label="이메일"
+                            errorMessage={errors.email?.message}
+                            size="small">
                             <Controller
                                 control={control}
                                 name="email"
-                                render={({ field: { onChange, value } }) => (
-                                    <View
-                                        className={`h-[58px] rounded-2xl border bg-bg-paper px-4 flex-row items-center ${
-                                            errors.email ? "border-error" : "border-divider"
-                                        }`}>
-                                        <Feather name="mail" size={19} color="#A18F8F" />
-
-                                        <TextInput
-                                            value={value}
-                                            onChangeText={onChange}
-                                            placeholder="이메일을 입력해주세요"
-                                            placeholderTextColor="#B7C1BE"
-                                            keyboardType="email-address"
-                                            autoCapitalize="none"
-                                            autoCorrect={false}
-                                            className="flex-1 ml-3 text-[15px] text-text-primary"
-                                        />
-                                    </View>
+                                render={({ field: { onChange, onBlur, value } }) => (
+                                    <Input
+                                        value={value}
+                                        onChangeText={onChange}
+                                        onBlur={onBlur}
+                                        placeholder="이메일을 입력해주세요"
+                                        keyboardType="email-address"
+                                        autoCapitalize="none"
+                                        autoCorrect={false}
+                                        autoComplete="off"
+                                        textContentType="none"
+                                        hasError={!!errors.email}
+                                    />
                                 )}
                             />
-
-                            {errors.email && <ErrorMessage>{errors.email.message}</ErrorMessage>}
-                        </View>
+                        </InputGroup>
 
                         {/* 비밀번호 */}
-                        <View>
-                            <Label>비밀번호</Label>
-
+                        <InputGroup
+                            label="비밀번호"
+                            errorMessage={errors.password?.message}
+                            size="small">
                             <Controller
                                 control={control}
                                 name="password"
-                                render={({ field: { onChange, value } }) => (
-                                    <View
-                                        className={`h-[58px] rounded-2xl border bg-bg-paper px-4 flex-row items-center ${
-                                            errors.password ? "border-error" : "border-divider"
-                                        }`}>
-                                        <Feather name="lock" size={19} color="#A18F8F" />
-
-                                        <TextInput
+                                render={({ field: { onChange, onBlur, value } }) => (
+                                    <View className="relative">
+                                        <Input
                                             value={value}
                                             onChangeText={onChange}
+                                            onBlur={onBlur}
                                             placeholder="비밀번호를 입력해주세요"
-                                            placeholderTextColor="#B7C1BE"
                                             secureTextEntry={!showPassword}
                                             autoCapitalize="none"
                                             autoCorrect={false}
-                                            className="flex-1 ml-3 text-[15px] text-text-primary"
+                                            hasError={!!errors.password}
+                                            className="pr-12"
                                         />
 
                                         <TouchableOpacity
+                                            className="absolute right-4 top-0 bottom-0 justify-center"
                                             onPress={() => setShowPassword(prev => !prev)}
                                             activeOpacity={0.7}>
                                             <Feather
@@ -232,27 +211,23 @@ export default function LoginScreen() {
                                 )}
                             />
 
-                            {errors.password && (
-                                <ErrorMessage>{errors.password.message}</ErrorMessage>
-                            )}
-
                             {/* 비밀번호 찾기 */}
                             <TouchableOpacity
-                                className="items-end mt-3"
+                                className="items-end mt-1"
                                 activeOpacity={0.7}
                                 onPress={() => console.log("비밀번호 찾기")}>
                                 <TextComponent className="text-[13px] text-text-secondary">
                                     비밀번호를 잊으셨나요?
                                 </TextComponent>
                             </TouchableOpacity>
-                        </View>
+                        </InputGroup>
                     </View>
 
                     {/* ========================================
                         로그인 버튼
                     ======================================== */}
 
-                    <View className="mt-10">
+                    <View className="mt-5">
                         <Button
                             color="primary"
                             variant="contained"
@@ -261,7 +236,7 @@ export default function LoginScreen() {
                             fullWidth
                             onPress={handleSubmit(handleLogin, handleLoginError)}
                             disabled={isLoading}
-                            className="h-[58px] rounded-2xl">
+                            className="h-[58px]">
                             {isLoading ? "로그인 중..." : "로그인"}
                         </Button>
                     </View>
@@ -288,7 +263,7 @@ export default function LoginScreen() {
                         구분선
                     ======================================== */}
 
-                    <View className="flex-row items-center mt-10">
+                    <View className="flex-row items-center mt-8">
                         <View className="flex-1 h-[1px] bg-divider" />
 
                         <TextComponent className="mx-5 text-[13px] text-text-secondary">
@@ -313,7 +288,7 @@ export default function LoginScreen() {
                                 console.log("게스트로 둘러보기");
                                 router.replace("/");
                             }}
-                            className="h-[58px] rounded-2xl">
+                            className="h-[58px]">
                             게스트로 둘러보기
                         </Button>
                     </View>
