@@ -85,7 +85,7 @@ function Button({
                         "font-bold",
                         getTextColorClasses(),
                         size === "small" ? "text-xs" : size === "large" ? "text-base" : "text-sm",
-                        textClassName
+                        textClassName,
                     )}>
                     {children}
                 </Text>
