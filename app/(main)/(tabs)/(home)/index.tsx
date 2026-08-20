@@ -7,12 +7,46 @@ import Card from "@/components/common/card/Card";
 import axiosInstance from "@/api/axiosInstance";
 import CreateWalletModal from "./CreateWalletModal";
 
-const CURRENCY_META: Record<string, { flag: string; symbol: string; defaultRate: number }> = {
-    USD: { flag: "🇺🇸", symbol: "$", defaultRate: 1424 },
-    JPY: { flag: "🇯🇵", symbol: "¥", defaultRate: 9.13 },
-    EUR: { flag: "🇪🇺", symbol: "€", defaultRate: 1385 },
-    CNY: { flag: "🇨🇳", symbol: "¥", defaultRate: 195 },
-    GBP: { flag: "🇬🇧", symbol: "£", defaultRate: 1780 },
+// 국가별 고해상도 국기 이미지 URL 및 메타데이터
+const CURRENCY_META: Record<
+    string,
+    { name: string; country: string; flagUrl: string; symbol: string; defaultRate: number }
+> = {
+    USD: {
+        name: "미국 달러",
+        country: "미국",
+        flagUrl: "https://flagcdn.com/w160/us.png",
+        symbol: "$",
+        defaultRate: 1424,
+    },
+    JPY: {
+        name: "일본 엔",
+        country: "일본",
+        flagUrl: "https://flagcdn.com/w160/jp.png",
+        symbol: "¥",
+        defaultRate: 9.13,
+    },
+    EUR: {
+        name: "유로",
+        country: "유럽",
+        flagUrl: "https://flagcdn.com/w160/eu.png",
+        symbol: "€",
+        defaultRate: 1385,
+    },
+    CNY: {
+        name: "중국 위안",
+        country: "중국",
+        flagUrl: "https://flagcdn.com/w160/cn.png",
+        symbol: "¥",
+        defaultRate: 195,
+    },
+    GBP: {
+        name: "영국 파운드",
+        country: "영국",
+        flagUrl: "https://flagcdn.com/w160/gb.png",
+        symbol: "£",
+        defaultRate: 1780,
+    },
 };
 
 export default function HomePage() {
@@ -30,7 +64,9 @@ export default function HomePage() {
             let calculatedTotalKRW = 0;
             const formattedWallets = wallets.map((wallet: any) => {
                 const meta = CURRENCY_META[wallet.currency] || {
-                    flag: "🌐",
+                    name: wallet.currency,
+                    country: "기타",
+                    flagUrl: "",
                     symbol: wallet.currency,
                     defaultRate: 1000,
                 };
@@ -44,10 +80,12 @@ export default function HomePage() {
                 return {
                     id: wallet.id || wallet.walletId,
                     currency: wallet.currency,
+                    name: meta.name,
+                    country: meta.country,
                     amount: wallet.balance,
                     krw: krwValue,
                     changeRate: wallet.changeRate ?? 0.42,
-                    flag: meta.flag,
+                    flagUrl: meta.flagUrl,
                     symbol: meta.symbol,
                 };
             });
@@ -62,7 +100,7 @@ export default function HomePage() {
     };
 
     useEffect(() => {
-        fetchHomeData().then(() => {})
+        fetchHomeData();
     }, []);
 
     const formatNumber = (num: number) => {
@@ -151,17 +189,39 @@ export default function HomePage() {
                                 <View
                                     key={item.id}
                                     className={`flex-row items-center justify-between py-4 ${!isLast ? "border-b border-divider/40" : ""}`}>
+                                    {/* 원형 국기 이미지 및 통화 정보 */}
                                     <View className="flex-row items-center">
-                                        <View className="w-12 h-12 rounded-full bg-white shadow-sm border border-divider/40 mr-4 items-center justify-center">
-                                            <TextComponent className="text-2xl">
-                                                {item.flag}
+                                        <View className="w-11 h-11 rounded-full overflow-hidden border border-divider/50 mr-3.5 bg-gray-100 shadow-sm items-center justify-center">
+                                            {item.flagUrl ? (
+                                                <Image
+                                                    source={{ uri: item.flagUrl }}
+                                                    className="w-full h-full"
+                                                    resizeMode="cover"
+                                                />
+                                            ) : (
+                                                <TextComponent className="text-base">
+                                                    🌐
+                                                </TextComponent>
+                                            )}
+                                        </View>
+                                        <View>
+                                            <View className="flex-row items-center gap-1.5 mb-0.5">
+                                                <TextComponent className="text-base font-bold text-text-primary">
+                                                    {item.currency}
+                                                </TextComponent>
+                                                <View className="bg-disabled/60 px-1.5 py-0.5 rounded">
+                                                    <TextComponent className="text-[10px] font-medium text-text-secondary">
+                                                        {item.country}
+                                                    </TextComponent>
+                                                </View>
+                                            </View>
+                                            <TextComponent className="text-xs text-text-secondary">
+                                                {item.name}
                                             </TextComponent>
                                         </View>
-                                        <TextComponent className="text-base font-bold text-text-primary">
-                                            {item.currency}
-                                        </TextComponent>
                                     </View>
 
+                                    {/* 잔액 및 환산 금액 */}
                                     <View className="items-end">
                                         <View className="flex-row items-center mb-1">
                                             <TextComponent className="text-base font-bold text-text-primary mr-2">
@@ -187,7 +247,7 @@ export default function HomePage() {
             {/* 4. 플로팅 버튼 */}
             <View className="absolute bottom-6 right-6">
                 <TouchableOpacity
-                    className="w-14 h-14 bg-primary-main rounded-full items-center justify-center"
+                    className="w-14 h-14 bg-primary-main rounded-full items-center justify-center shadow-lg"
                     activeOpacity={0.8}
                     onPress={() => setIsModalOpen(true)}>
                     <TextComponent
@@ -198,7 +258,6 @@ export default function HomePage() {
                 </TouchableOpacity>
             </View>
 
-            {/* 분리한 지갑 추가 모달 연결 */}
             <CreateWalletModal
                 visible={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
