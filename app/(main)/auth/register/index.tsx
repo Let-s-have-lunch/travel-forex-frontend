@@ -22,7 +22,7 @@ export default function RegisterScreen() {
         formState: { errors, isSubmitting },
     } = useForm({
         resolver: zodResolver(registerUserSchema),
-        mode: "onTouched"
+        mode: "onTouched",
         defaultValues: {
             email: "",
             nickname: "",
