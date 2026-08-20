@@ -18,7 +18,7 @@ interface Props {
     leftIcon?: ReactNode;
 }
 
-function Title({
+export default function Title({
     title,
     showBackButton = false,
     onBackPress,

@@ -12,7 +12,7 @@ import Button from "@/components/common/button/Button";
 
 import { createUser } from "@/api/user/userApi";
 import { RegisterUserInputType, registerUserSchema } from "@/schemas/user/registerUserSchema";
-import Title from "@/components/common/title/title";
+import Title from "@/components/common/title/Title";
 
 export default function RegisterScreen() {
     const router = useRouter();
