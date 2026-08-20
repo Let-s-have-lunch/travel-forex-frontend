@@ -131,7 +131,10 @@ export default function TripListPage({ navigation }: any) {
                     onPress={() => {
                         setActiveTab("ONGOING");
                         router.setParams({ page: "1" });
-                    }}>
+
+                    }}
+                    className={activeTab === "ONGOING" ? "" : "border-border bg-surface"}
+                    textClassName={activeTab === "ONGOING" ? "" : "text-text-tertiary"}>
                     진행중
                 </Button>
                 <Button
@@ -171,7 +174,6 @@ export default function TripListPage({ navigation }: any) {
                             <Pagination
                                 currentPage={currentPage}
                                 totalPages={totalPage}
-                                // NoticeListPage처럼 라우터 파라미터 변경 방식으로 수정
                                 onPageChange={newPage =>
                                     router.setParams({
                                         page: String(newPage),
