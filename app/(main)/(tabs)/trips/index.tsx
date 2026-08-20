@@ -5,7 +5,6 @@ import LoadingIndicator from "@/components/common/loading/Loading";
 import Button from "@/components/common/button/Button";
 import { Feather } from "@expo/vector-icons";
 import Card from "@/components/common/card/Card";
-import Title from "@/components/common/title/title";
 import Pagination from "@/components/common/pagination/Pagination";
 import { Trip } from "@/types/trip";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -13,6 +12,7 @@ import tripApi from "@/api/user/tripApi";
 import TripFormModal from "@/components/domain/trips/TripFormModal";
 import { TripInputType } from "@/schemas/trip/tripSchema";
 import { format } from "date-fns";
+import Title from "@/components/common/title/Title";
 
 type TabType = "ONGOING" | "PAST";
 

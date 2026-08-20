@@ -22,7 +22,7 @@ import TextComponent from "@/components/common/text/TextComponent";
 
 import { tripSchema, TripInputType } from "@/schemas/trip/tripSchema";
 import { Trip } from "@/types/trip";
-import Title from "@/components/common/title/title";
+import Title from "@/components/common/title/Title";
 
 interface TripFormModalProps {
     visible: boolean;
