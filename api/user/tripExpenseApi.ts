@@ -1,12 +1,7 @@
 import api from "@/api/axiosInstance";
 import { TripExpense } from "@/types/tripExpense";
 import { PaginationResponseType } from "@/types/common";
-import { Trip } from "@/types/trip";
-
-const getTripById = async (tripId: number): Promise<Trip> => {
-    const response = await api.get(`/trips/${tripId}`);
-    return response.data.data;
-};
+import { TripExpenseInputType } from "@/schemas/tripExpense/tripExpenseSchema";
 
 const fetchTripExpenseList = async (
     tripId: number,
@@ -22,10 +17,37 @@ const fetchTripExpenseList = async (
     return response.data.data;
 };
 
-// ... 나머지 함수들 (createTrip, updateTrip, deleteTrip)
+const getTripExpenseDetail = async (tripId: number, expenseId: number): Promise<TripExpense> => {
+    const response = await api.get(`/trips/${tripId}/expenses/${expenseId}`);
+    return response.data.data;
+};
+
+const createTripExpense = async (
+    tripId: number,
+    data: TripExpenseInputType,
+): Promise<TripExpense> => {
+    const response = await api.post(`/trips/${tripId}/expenses`, data);
+    return response.data.data;
+};
+
+const updateTripExpense = async (
+    tripId: number,
+    expenseId: number,
+    data: TripExpenseInputType,
+): Promise<TripExpense> => {
+    const response = await api.patch(`/trips/${tripId}/expenses/${expenseId}`, data);
+    return response.data.data;
+};
+
+const deleteTripExpense = async (tripId: number, expenseId: number): Promise<void> => {
+    const response = await api.delete(`/trips/${tripId}/expenses/${expenseId}`);
+    return response.data;
+};
 
 export default {
-    getTripById,
     fetchTripExpenseList,
-    // ...
+    getTripExpenseDetail,
+    createTripExpense,
+    updateTripExpense,
+    deleteTripExpense,
 };
