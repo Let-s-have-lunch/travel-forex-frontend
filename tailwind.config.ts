@@ -1,10 +1,10 @@
 import type { Config } from "tailwindcss";
 
 export default {
-    // 다크모드를 'class' 기반으로 설정 (최상위 태그에 'dark' 클래스가 있으면 다크모드 적용)
+    // 다크모드를 'class' 기반으로 설정
     darkMode: "class",
 
-    // Tailwind 클래스를 사용할 경로 지정 (프로젝트 구조에 맞게 수정 가능)
+    // Tailwind 클래스를 사용할 경로 지정
     content: [
         "./app/**/*.{js,jsx,ts,tsx}",
         "./components/**/*.{js,jsx,ts,tsx}",
@@ -54,6 +54,7 @@ export default {
                     secondary: "var(--text-secondary)",
                     tertiary: "var(--text-tertiary)",
                     disabled: "var(--text-disabled)",
+                    inverse: "var(--text-inverse)",
                 },
 
                 /* ===== Semantic ===== */
@@ -85,11 +86,12 @@ export default {
     },
 
     plugins: [],
+
     safelist: [
         {
             // 1. primary, text, chart, accent 등 서브키가 존재하는 색상 처리
             pattern:
-                /(bg|text|border)-(primary|accent|text|chart)-(main|light|sub|dark|coral|peach|sky|lavender|primary|secondary|tertiary|disabled|1|2|3|4|5|6)/,
+                /(bg|text|border)-(primary|accent|text|chart)-(main|light|sub|dark|coral|peach|sky|lavender|primary|secondary|tertiary|disabled|inverse|1|2|3|4|5|6)/,
         },
         {
             // 2. background, surface, card, border, success 등 단일 키 색상 처리

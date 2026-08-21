@@ -31,6 +31,7 @@
         --text-secondary: #54615C;
         --text-tertiary: #86918C;
         --text-disabled: #B7C1BE;
+        --text-inverse: #FFFFFF;
 
         /* ===== Semantic ===== */
         --success: #4CAF7A;
@@ -88,6 +89,7 @@
         --text-secondary: #C7D0CD;
         --text-tertiary: #93A19C;
         --text-disabled: #657068;
+        --text-inverse: #FFFFFF;
 
         /* ===== Semantic ===== */
         --success: #66D19A;
