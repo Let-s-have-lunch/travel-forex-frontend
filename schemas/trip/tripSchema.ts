@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { CurrencyCodeList } from "@/types/trip"; // 🆕 types에서 분리한 상수 배열 가져오기
 
 export const tripSchema = z
     .object({
@@ -6,6 +7,9 @@ export const tripSchema = z
         startDate: z.string().min(1, "여행 시작일을 입력해주세요."),
         endDate: z.string().min(1, "여행 종료일을 입력해주세요."),
         budgetKrw: z.number().min(0, "예산은 0 이상이어야 합니다."),
+        currency: z.enum(CurrencyCodeList, {
+            message: "기준 통화를 선택해주세요.",
+        }),
     })
     .refine(
         data => {

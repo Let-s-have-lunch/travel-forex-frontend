@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
+import { Image } from "react-native";
 import TextComponent from "@/components/common/text/TextComponent";
 import { Alert, FlatList, Platform, Pressable, TouchableOpacity, View } from "react-native";
 import LoadingIndicator from "@/components/common/loading/Loading";
 import Button from "@/components/common/button/Button";
 import { Feather } from "@expo/vector-icons";
-import Card from "@/components/common/card/Card";
 import Pagination from "@/components/common/pagination/Pagination";
 import { Trip } from "@/types/trip";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -13,6 +13,8 @@ import TripFormModal from "@/components/domain/trips/TripFormModal";
 import { TripInputType } from "@/schemas/trip/tripSchema";
 import Title from "@/components/common/title/Title";
 import { TabType } from "@/types/status";
+import Card from "@/components/common/card/Card";
+import { getTripThumbnail } from "@/utils/tripImage";
 
 export default function TripListPage() {
     const router = useRouter();
@@ -59,7 +61,7 @@ export default function TripListPage() {
 
     // 🛠️ [수정] 렌더링 시 fetchTrips에 현재 activeTab을 인자로 넘김
     useEffect(() => {
-        fetchTrips(currentPage, pageSize, activeTab);
+        fetchTrips(currentPage, pageSize, activeTab).then(() => {});
     }, [currentPage, fetchTrips, pageSize, activeTab]); // 🆕 [추가] 의존성 배열에 activeTab 추가
 
     // 공지사항과 동일한 계산 방식 적용 (전체 개수 total 기준)
@@ -155,7 +157,16 @@ export default function TripListPage() {
                         router.push(`/trips/${item.id}`);
                     }}>
                     <Card className="flex-row items-center p-4 relative">
-                        <View className="w-16 h-16 rounded-2xl bg-primary-sub mr-4 overflow-hidden" />
+                        <View className="w-16 h-[88px] rounded-xl bg-primary-sub mr-4 overflow-hidden">
+                            <Image
+                                source={getTripThumbnail(item.currency)}
+                                style={{
+                                    width: "100%",
+                                    height: "100%",
+                                }}
+                                resizeMode="cover"
+                            />
+                        </View>
 
                         <View className="flex-1 justify-center gap-1 pr-6">
                             <TextComponent className="text-lg font-bold text-text-primary">
@@ -230,6 +241,7 @@ export default function TripListPage() {
             </View>
         );
     };
+
 
     return (
         <View className="flex-1 bg-background">
