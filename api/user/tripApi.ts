@@ -2,12 +2,18 @@ import { PaginationResponseType } from "@/types/common";
 import api from "@/api/axiosInstance";
 import { Trip } from "@/types/trip";
 import { TripInputType } from "@/schemas/trip/tripSchema";
+import { TabType } from "@/types/status";
 
-const fetchTripList = async (page: number, size: number): Promise<PaginationResponseType<Trip>> => {
+const fetchTripList = async (
+    page: number,
+    size: number,
+    status: TabType,
+): Promise<PaginationResponseType<Trip>> => {
     const response = await api.get("/trips", {
         params: {
             page,
             size,
+            status,
         },
     });
     return response.data.data;
