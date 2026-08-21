@@ -1,318 +1,201 @@
-import React, { useState } from "react";
-import {
-    View,
-    TextInput,
-    TouchableOpacity,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    Alert,
-} from "react-native";
-import { useRouter } from "expo-router";
 import { Feather } from "@expo/vector-icons";
-import { Controller, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { Pressable, ScrollView, Switch, View } from "react-native";
+import { useRouter } from "expo-router";
 
 import TextComponent from "@/components/common/text/TextComponent";
-import Label from "@/components/common/label/Label";
-import ErrorMessage from "@/components/common/label/ErrorMessage";
 import Button from "@/components/common/button/Button";
+import { useAuthStore } from "@/stores/auth/useAuthStore";
 
-import { loginUser } from "@/api/user/userApi";
-import { LoginUserInputType, loginUserSchema } from "@/schemas/user/loginUserSchema";
-
-export default function LoginScreen() {
+export default function MyPage() {
     const router = useRouter();
 
-    const [showPassword, setShowPassword] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
+    const { user, isLoggedIn } = useAuthStore();
 
-    const {
-        control,
-        handleSubmit,
-        formState: { errors },
-    } = useForm<LoginUserInputType>({
-        resolver: zodResolver(loginUserSchema),
-        defaultValues: {
-            email: "",
-            password: "",
-        },
-    });
+    const handleLogin = () => {
+        router.push("/auth/login");
+    };
 
-    /* ========================================
-       로그인 성공
-    ======================================== */
+    const handleMenuPress = (menu: string) => {
+        if (!isLoggedIn) {
+            router.push("/auth/login");
+            return;
+        }
 
-    const handleLogin = async (data: LoginUserInputType) => {
-        console.log("① 로그인 버튼 클릭");
-        console.log("② Zod 검증 성공");
+        switch (menu) {
+            case "profile":
+                router.push("/my-page");
+                break;
 
-        try {
-            setIsLoading(true);
+            case "password":
+                router.push("/my-page");
+                break;
 
-            console.log("③ 로그인 API 요청 시작");
+            case "notification":
+                router.push("/my-page");
+                break;
 
-            const response = await loginUser(data);
+            case "inquiry":
+                router.push("/my-page");
+                break;
 
-            console.log("④ 로그인 API 응답 성공");
-            console.log("로그인 응답:", response);
+            case "announcement":
+                router.push("/my-page");
+                break;
 
-            console.log("⑤ 홈 화면으로 이동");
-
-            router.replace("/");
-        } catch (error: any) {
-            console.error("❌ 로그인 오류:", error);
-
-            if (error.response) {
-                const status = error.response.status;
-                const message = error.response.data?.message;
-
-                console.log("❌ 서버 상태 코드:", status);
-                console.log("❌ 서버 응답:", error.response.data);
-
-                if (status === 401) {
-                    Alert.alert(
-                        "로그인 실패",
-                        message || "이메일 또는 비밀번호가 올바르지 않습니다.",
-                    );
-                    return;
-                }
-
-                if (status === 400) {
-                    Alert.alert("입력 오류", message || "입력한 정보를 확인해주세요.");
-                    return;
-                }
-
-                Alert.alert("로그인 실패", message || "로그인 중 오류가 발생했습니다.");
-
-                return;
-            }
-
-            if (error.request) {
-                Alert.alert(
-                    "서버 연결 오류",
-                    "백엔드 서버에 연결할 수 없습니다.\n백엔드 서버가 실행 중인지 확인해주세요.",
-                );
-
-                return;
-            }
-
-            Alert.alert("오류", "로그인 처리 중 문제가 발생했습니다.");
-        } finally {
-            setIsLoading(false);
+            case "logout":
+                // logout 처리
+                break;
         }
     };
 
-    /* ========================================
-       Zod 검증 실패
-    ======================================== */
-
-    const handleLoginError = (formErrors: typeof errors) => {
-        console.log("❌ Zod 검증 실패:", formErrors);
-    };
-
     return (
-        <KeyboardAvoidingView
-            className="flex-1 bg-bg-default"
-            behavior={Platform.OS === "ios" ? "padding" : undefined}>
+        <View className="flex-1 ">
             <ScrollView
-                className="flex-1"
+                showsVerticalScrollIndicator={false}
                 contentContainerStyle={{
-                    flexGrow: 1,
-                    paddingBottom: 40,
-                }}
-                keyboardShouldPersistTaps="handled"
-                showsVerticalScrollIndicator={false}>
-                <View className="flex-1 px-[24px] pt-[28px]">
-                    {/* ========================================
-                        뒤로가기
-                    ======================================== */}
-
-                    <TouchableOpacity
-                        className="w-[40px] h-[40px] items-center justify-center"
-                        activeOpacity={0.7}
-                        onPress={() => router.back()}>
-                        <Feather name="chevron-left" size={30} color="#3F4643" />
-                    </TouchableOpacity>
-
-                    {/* ========================================
-                        제목
-                    ======================================== */}
-
-                    <View className="mt-8">
-                        <TextComponent className="text-[32px] font-bold text-text-primary">
-                            로그인
-                        </TextComponent>
-
-                        <TextComponent className="mt-2 text-[15px] text-text-secondary">
-                            여행을 더 스마트하게 관리해보세요.
-                        </TextComponent>
-                    </View>
-
-                    {/* ========================================
-                        입력 영역
-                    ======================================== */}
-
-                    <View className="mt-12 gap-6">
-                        {/* 이메일 */}
-                        <View>
-                            <Label>이메일</Label>
-
-                            <Controller
-                                control={control}
-                                name="email"
-                                render={({ field: { onChange, value } }) => (
-                                    <View
-                                        className={`h-[58px] rounded-2xl border bg-bg-paper px-4 flex-row items-center ${
-                                            errors.email ? "border-error" : "border-divider"
-                                        }`}>
-                                        <Feather name="mail" size={19} color="#A18F8F" />
-
-                                        <TextInput
-                                            value={value}
-                                            onChangeText={onChange}
-                                            placeholder="이메일을 입력해주세요"
-                                            placeholderTextColor="#B7C1BE"
-                                            keyboardType="email-address"
-                                            autoCapitalize="none"
-                                            autoCorrect={false}
-                                            className="flex-1 ml-3 text-[15px] text-text-primary"
-                                        />
-                                    </View>
-                                )}
-                            />
-
-                            {errors.email && <ErrorMessage>{errors.email.message}</ErrorMessage>}
-                        </View>
-
-                        {/* 비밀번호 */}
-                        <View>
-                            <Label>비밀번호</Label>
-
-                            <Controller
-                                control={control}
-                                name="password"
-                                render={({ field: { onChange, value } }) => (
-                                    <View
-                                        className={`h-[58px] rounded-2xl border bg-bg-paper px-4 flex-row items-center ${
-                                            errors.password ? "border-error" : "border-divider"
-                                        }`}>
-                                        <Feather name="lock" size={19} color="#A18F8F" />
-
-                                        <TextInput
-                                            value={value}
-                                            onChangeText={onChange}
-                                            placeholder="비밀번호를 입력해주세요"
-                                            placeholderTextColor="#B7C1BE"
-                                            secureTextEntry={!showPassword}
-                                            autoCapitalize="none"
-                                            autoCorrect={false}
-                                            className="flex-1 ml-3 text-[15px] text-text-primary"
-                                        />
-
-                                        <TouchableOpacity
-                                            onPress={() => setShowPassword(prev => !prev)}
-                                            activeOpacity={0.7}>
-                                            <Feather
-                                                name={showPassword ? "eye" : "eye-off"}
-                                                size={20}
-                                                color="#A18F8F"
-                                            />
-                                        </TouchableOpacity>
-                                    </View>
-                                )}
-                            />
-
-                            {errors.password && (
-                                <ErrorMessage>{errors.password.message}</ErrorMessage>
-                            )}
-
-                            {/* 비밀번호 찾기 */}
-                            <TouchableOpacity
-                                className="items-end mt-3"
-                                activeOpacity={0.7}
-                                onPress={() => console.log("비밀번호 찾기")}>
-                                <TextComponent className="text-[13px] text-text-secondary">
-                                    비밀번호를 잊으셨나요?
-                                </TextComponent>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-
-                    {/* ========================================
-                        로그인 버튼
-                    ======================================== */}
-
-                    <View className="mt-10">
-                        <Button
-                            color="primary"
-                            variant="contained"
-                            size="large"
-                            shape="rounded"
-                            fullWidth
-                            onPress={handleSubmit(handleLogin, handleLoginError)}
-                            disabled={isLoading}
-                            className="h-[58px] rounded-2xl">
-                            {isLoading ? "로그인 중..." : "로그인"}
-                        </Button>
-                    </View>
-
-                    {/* ========================================
-                        회원가입
-                    ======================================== */}
-
-                    <View className="flex-row justify-center items-center mt-6">
-                        <TextComponent className="text-[14px] text-text-secondary">
-                            아직 회원이 아니신가요?
-                        </TextComponent>
-
-                        <TouchableOpacity
-                            activeOpacity={0.7}
-                            onPress={() => router.push("/auth/register")}>
-                            <TextComponent className="ml-1 text-[14px] font-semibold text-primary-main">
-                                회원가입
-                            </TextComponent>
-                        </TouchableOpacity>
-                    </View>
-
-                    {/* ========================================
-                        구분선
-                    ======================================== */}
-
-                    <View className="flex-row items-center mt-10">
-                        <View className="flex-1 h-[1px] bg-divider" />
-
-                        <TextComponent className="mx-5 text-[13px] text-text-secondary">
-                            또는
-                        </TextComponent>
-
-                        <View className="flex-1 h-[1px] bg-divider" />
-                    </View>
-
-                    {/* ========================================
-                        게스트 둘러보기
-                    ======================================== */}
-
-                    <View className="mt-8">
-                        <Button
-                            color="primary"
-                            variant="outlined"
-                            size="large"
-                            shape="rounded"
-                            fullWidth
-                            onPress={() => {
-                                console.log("게스트로 둘러보기");
-                                router.replace("/");
-                            }}
-                            className="h-[58px] rounded-2xl">
-                            게스트로 둘러보기
-                        </Button>
-                    </View>
-
-                    {/* 하단 여백 */}
-                    <View className="flex-1" />
+                    paddingBottom: 120,
+                }}>
+                {/* 페이지 제목 */}
+                <View className="px-6 pt-6 pb-5">
+                    <TextComponent className="text-xl font-bold text-text-default">
+                        마이페이지
+                    </TextComponent>
                 </View>
+
+                {/* ========================= */}
+                {/* 프로필 영역 */}
+                {/* ========================= */}
+
+                {isLoggedIn ? (
+                    <View className="mx-5 mb-6 rounded-3xl bg-white">
+                        <View className="flex-row items-center">
+                            {/* 프로필 이미지 */}
+                            <View className="h-16 w-16 items-center justify-center overflow-hidden rounded-full bg-secondary-main">
+                                <TextComponent className="text-3xl">🧳</TextComponent>
+                            </View>
+
+                            {/* 사용자 정보 */}
+                            <View className="ml-4 flex-1">
+                                <TextComponent className="text-lg font-bold text-primary-main">
+                                    {user?.nickname ?? "여행자님"}
+                                </TextComponent>
+
+                                <TextComponent className="mt-1 text-xs text-gray-500">
+                                    {user?.email ?? "travel@example.com"}
+                                </TextComponent>
+                            </View>
+                        </View>
+                    </View>
+                ) : (
+                    <Pressable
+                        onPress={handleLogin}
+                        className="mx-5 mb-6 flex-row items-center rounded-3xl bg-primary-main px-5 py-5">
+                        {/* 로그인 아이콘 */}
+                        <View className="h-14 w-14 items-center justify-center rounded-full bg-white/70">
+                            <Feather name="user" size={24} color="#6FA89E" />
+                        </View>
+
+                        {/* 로그인 안내 */}
+                        <View className="ml-4 flex-1">
+                            <TextComponent className="text-base font-bold text-white">
+                                로그인이 필요해요
+                            </TextComponent>
+
+                            {/*<TextComponent className="mt-1 text-xs text-white/80">*/}
+                            {/*    로그인하고 여행 기록을 관리해보세요*/}
+                            {/*</TextComponent>*/}
+                        </View>
+
+                        <Feather name="chevron-right" size={22} color="#FFFFFF" />
+                    </Pressable>
+                )}
+
+                {/* ========================= */}
+                {/* 회원 관리 */}
+                {/* ========================= */}
+
+                <MenuSection title="회원관리">
+                    <MenuItem
+                        icon="user"
+                        title="프로필 관리"
+                        onPress={() => handleMenuPress("profile")}
+                    />
+
+                    <MenuItem
+                        icon="lock"
+                        title="비밀번호 수정"
+                        onPress={() => handleMenuPress("password")}
+                    />
+
+                </MenuSection>
+
+                {/* ========================= */}
+                {/* 고객센터 */}
+                {/* ========================= */}
+
+                <MenuSection title="고객센터">
+                    <MenuItem
+                        icon="help-circle"
+                        title="1:1 문의"
+                        onPress={() => handleMenuPress("inquiry")}
+                    />
+
+                    <MenuItem
+                        icon="message-circle"
+                        title="공지사항"
+                        onPress={() => handleMenuPress("announcement")}
+                    />
+                </MenuSection>
+                
             </ScrollView>
-        </KeyboardAvoidingView>
+        </View>
+    );
+}
+
+/* ========================================
+   메뉴 섹션
+======================================== */
+
+interface MenuSectionProps {
+    title: string;
+    children: React.ReactNode;
+}
+
+function MenuSection({ title, children }: MenuSectionProps) {
+    return (
+        <View className="px-6">
+            <TextComponent className="mb-2 mt-4 text-sm font-bold text-gray-500">
+                {title}
+            </TextComponent>
+
+            <View>{children}</View>
+        </View>
+    );
+}
+
+/* ========================================
+   메뉴 아이템
+======================================== */
+
+interface MenuItemProps {
+    icon: keyof typeof Feather.glyphMap;
+    title: string;
+    onPress: () => void;
+}
+
+function MenuItem({ icon, title, onPress }: MenuItemProps) {
+    return (
+        <Pressable onPress={onPress} className="flex-row items-center py-4">
+            {/* 아이콘 */}
+            <View className="w-8 items-center">
+                <Feather name={icon} size={21} color="#777777" />
+            </View>
+
+            {/* 텍스트 */}
+            <TextComponent className="ml-3 flex-1 text-sm text-text-default">{title}</TextComponent>
+
+            {/* 화살표 */}
+            <Feather name="chevron-right" size={20} color="#999999" />
+        </Pressable>
     );
 }

@@ -1,4 +1,5 @@
 import api from "@/api/axiosInstance";
+import { User } from "@/types/user";
 
 /* ========================================
    회원가입
@@ -13,19 +14,9 @@ export interface CreateUserRequest {
     birthdate: string;
 }
 
-export interface UserResponse {
-    id: number;
-    email: string;
-    nickname: string;
-    phoneNumber: string;
-    gender: "MALE" | "FEMALE";
-    birthdate: string;
-    role: string;
-}
-
 export interface CreateUserResponse {
     message: string;
-    data: UserResponse;
+    data: User;
 }
 
 export const createUser = async (request: CreateUserRequest): Promise<CreateUserResponse> => {
@@ -43,16 +34,21 @@ export interface LoginUserRequest {
     password: string;
 }
 
+export interface LoginData {
+    user: User;
+    token: string;
+}
+
 export interface LoginUserResponse {
     message: string;
     data: {
-        user: UserResponse;
+        user: User;
         token: string;
     };
 }
 
-export const loginUser = async (request: LoginUserRequest): Promise<LoginUserResponse> => {
+export const loginUser = async (request: LoginUserRequest): Promise<LoginData> => {
     const response = await api.post<LoginUserResponse>("/users/login", request);
 
-    return response.data;
+    return response.data.data;
 };

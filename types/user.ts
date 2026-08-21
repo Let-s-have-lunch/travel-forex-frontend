@@ -15,13 +15,9 @@ export type RoleType = (typeof Role)[keyof typeof Role];
 export interface User {
     id: number;
     email: string;
-    password: string;
     nickname: string;
     phoneNumber: string;
     gender: GenderType;
     birthdate: string;
     role: RoleType;
-    createdAt: string;
-    updatedAt: string;
-    deletedAt: string | null;
 }
