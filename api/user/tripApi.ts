@@ -45,3 +45,4 @@ export default {
     updateTrip,
     deleteTrip,
 };
+
