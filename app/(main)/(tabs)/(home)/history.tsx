@@ -4,6 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import TextComponent from "@/components/common/text/TextComponent";
+import Card from "@/components/common/card/Card";
 import axiosInstance from "@/api/axiosInstance";
 import { TransactionItem, PeriodType, PeriodOption } from "@/types/wallet";
 
@@ -117,12 +118,12 @@ export default function HistoryPage() {
             krwAmount: Number(calculatedKrw) || 0,
             bankName: tx.transactionMethod || tx.bankName || "은행 계좌",
             createdAt: tx.transactionDate || tx.createdAt || new Date().toISOString(),
-            memo: tx.memo || undefined, //
+            memo: tx.memo || undefined,
         };
     };
 
     useEffect(() => {
-        fetchTransactions().then(() => {})
+        fetchTransactions().then(() => {});
     }, [fetchTransactions]);
 
     const formatNumber = (num: number) => {
@@ -195,19 +196,25 @@ export default function HistoryPage() {
             <StatusBar style="dark" />
 
             <View className="px-6 flex-1 max-w-[600px] w-full self-center">
-                <View className="relative py-4 items-center justify-center">
+                {/* 상단 네비게이션 헤더 (3단 완벽 대칭 중앙 정렬) */}
+                <View className="flex-row items-center justify-between py-4 w-full">
                     <TouchableOpacity
                         onPress={() => router.back()}
-                        className="absolute left-0 w-10 h-10 items-start justify-center">
+                        className="w-10 h-10 items-start justify-center">
                         <TextComponent className="text-2xl font-bold text-text-primary">
                             ‹
                         </TextComponent>
                     </TouchableOpacity>
-                    <TextComponent className="text-lg font-bold text-text-primary">
+
+                    <TextComponent className="text-lg font-bold text-text-primary text-center">
                         거래내역
                     </TextComponent>
+
+                    {/* 좌우 대칭용 더미 공간 */}
+                    <View className="w-10 h-10" />
                 </View>
 
+                {/* 1. 입금 / 출금 토글 탭 */}
                 <View className="flex-row bg-[#EBEFEF] p-1 rounded-2xl mb-4">
                     <TouchableOpacity
                         className={`flex-1 py-2.5 rounded-xl items-center justify-center ${
@@ -236,19 +243,29 @@ export default function HistoryPage() {
                     </TouchableOpacity>
                 </View>
 
+                {/* 2. 기간 선택 필터 바 */}
                 <TouchableOpacity
                     activeOpacity={0.7}
                     onPress={() => setIsPeriodModalOpen(true)}
-                    className="flex-row justify-between items-center bg-card border border-border px-4 py-3.5 rounded-2xl mb-6">
-                    <TextComponent className="text-sm font-bold text-text-primary">
-                        {currentPeriodLabel}
-                    </TextComponent>
-                    <View className="flex-row items-center gap-1.5">
-                        <TextComponent className="text-xs text-text-secondary">📅</TextComponent>
-                        <TextComponent className="text-[10px] text-text-tertiary">▼</TextComponent>
-                    </View>
+                    className="mb-6">
+                    <Card
+                        className="flex-row justify-between items-center bg-card border border-border px-4 py-3.5 rounded-2xl"
+                        shadow="none">
+                        <TextComponent className="text-sm font-bold text-text-primary">
+                            {currentPeriodLabel}
+                        </TextComponent>
+                        <View className="flex-row items-center gap-1.5">
+                            <TextComponent className="text-xs text-text-secondary">
+                                📅
+                            </TextComponent>
+                            <TextComponent className="text-[10px] text-text-tertiary">
+                                ▼
+                            </TextComponent>
+                        </View>
+                    </Card>
                 </TouchableOpacity>
 
+                {/* 3. 거래 내역 리스트 */}
                 <ScrollView
                     showsVerticalScrollIndicator={false}
                     contentContainerStyle={{ paddingBottom: 40 }}>
@@ -262,6 +279,7 @@ export default function HistoryPage() {
                     ) : (
                         Object.entries(groupedTransactions).map(([date, items]) => (
                             <View key={date} className="mb-6">
+                                {/* 날짜 헤더 */}
                                 <TextComponent className="text-sm font-bold text-text-primary mb-3">
                                     {date}
                                 </TextComponent>
@@ -278,6 +296,7 @@ export default function HistoryPage() {
                                             <View
                                                 key={item.id}
                                                 className="flex-row justify-between items-start py-2">
+                                                {/* 좌측: 국기 + 정보 + 메모 */}
                                                 <View className="flex-row items-start flex-1 mr-3">
                                                     <View className="w-10 h-10 rounded-full overflow-hidden border border-border mr-3 bg-gray-100 items-center justify-center mt-0.5">
                                                         {meta.flagUrl ? (
@@ -301,6 +320,7 @@ export default function HistoryPage() {
                                                             {item.bankName}
                                                         </TextComponent>
 
+                                                        {/* 메모 박스 */}
                                                         {item.memo ? (
                                                             <View className="bg-background border border-border/80 self-start px-2.5 py-1 rounded-lg mt-0.5">
                                                                 <TextComponent className="text-xs text-text-secondary">
@@ -330,6 +350,7 @@ export default function HistoryPage() {
                 </ScrollView>
             </View>
 
+            {/* 조회 기간 모달 */}
             <Modal visible={isPeriodModalOpen} transparent animationType="fade">
                 <TouchableOpacity
                     activeOpacity={1}

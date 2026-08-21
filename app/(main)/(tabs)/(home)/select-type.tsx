@@ -20,25 +20,30 @@ export default function SelectTypePage() {
         <SafeAreaView className="flex-1 bg-background" edges={["top"]}>
             <StatusBar style="dark" />
 
-            <View className="flex-1 px-6 pb-6">
-                <View className="relative py-4 items-center justify-center">
+            <View className="flex-1 px-6 pb-8 max-w-[600px] w-full self-center">
+                {/* 상단 헤더 (타이틀 중앙 정렬 수정) */}
+                <View className="w-full py-4 relative items-center justify-center">
                     <TouchableOpacity
                         onPress={() => router.back()}
-                        className="absolute left-0 w-10 h-10 items-start justify-center">
+                        className="absolute left-0 top-3 w-10 h-10 items-start justify-center z-10">
                         <TextComponent className="text-2xl font-bold text-text-primary">
                             ‹
                         </TextComponent>
                     </TouchableOpacity>
 
-                    <TextComponent className="text-lg font-bold text-text-primary">
-                        거래 유형 선택
-                    </TextComponent>
-                    <TextComponent className="text-xs text-text-secondary mt-1">
-                        추가할 거래 유형을 선택해주세요.
-                    </TextComponent>
+                    <View className="items-center justify-center">
+                        <TextComponent className="text-lg font-bold text-text-primary text-center">
+                            거래 유형 선택
+                        </TextComponent>
+                        <TextComponent className="text-xs text-text-secondary text-center mt-1">
+                            추가할 거래 유형을 선택해주세요.
+                        </TextComponent>
+                    </View>
                 </View>
 
+                {/* 카드 영역 */}
                 <View className="flex-1 flex-col gap-5 mt-4">
+                    {/* 1. 입금 카드 */}
                     <TouchableOpacity
                         className="flex-1"
                         activeOpacity={0.85}
@@ -60,6 +65,7 @@ export default function SelectTypePage() {
                         </Card>
                     </TouchableOpacity>
 
+                    {/* 2. 출금 카드 */}
                     <TouchableOpacity
                         className="flex-1"
                         activeOpacity={0.85}
