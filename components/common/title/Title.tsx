@@ -57,7 +57,7 @@ function Title({
                         {title && (
                             <TextComponent
                                 className={twMerge(
-                                    "text-slate-900 font-bold text-[22px]",
+                                    "text-text-primary font-bold text-[22px]",
                                     textClassName,
                                 )}
                                 numberOfLines={1}>
@@ -67,7 +67,7 @@ function Title({
 
                         {description && (
                             <TextComponent
-                                className="text-[12px] text-slate-500 mt-0.5"
+                                className="text-[12px] text-text-secondary mt-0.5"
                                 numberOfLines={1}>
                                 {description}
                             </TextComponent>
@@ -89,7 +89,7 @@ function Title({
                     {title && (
                         <TextComponent
                             className={twMerge(
-                                "text-slate-900 font-bold text-[20px] text-center",
+                                "text-text-primary font-bold text-[20px] text-center",
                                 textClassName,
                             )}
                             numberOfLines={1}>
@@ -99,7 +99,7 @@ function Title({
 
                     {description && (
                         <TextComponent
-                            className="text-[12px] text-slate-500 mt-0.5 text-center"
+                            className="text-[12px] text-text-secondary mt-0.5 text-center"
                             numberOfLines={1}>
                             {description}
                         </TextComponent>
