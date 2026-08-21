@@ -2,16 +2,22 @@ import React, { useEffect, useState } from "react";
 import { View, ScrollView, TouchableOpacity, Image, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
+import { useRouter } from "expo-router";
 import TextComponent from "@/components/common/text/TextComponent";
 import Card from "@/components/common/card/Card";
 import axiosInstance from "@/api/axiosInstance";
-import CreateWalletModal from "./CreateWalletModal";
 
-// 국가별 고해상도 국기 이미지 URL 및 메타데이터
 const CURRENCY_META: Record<
     string,
     { name: string; country: string; flagUrl: string; symbol: string; defaultRate: number }
 > = {
+    KRW: {
+        name: "대한민국 원",
+        country: "한국",
+        flagUrl: "https://flagcdn.com/w160/kr.png",
+        symbol: "₩",
+        defaultRate: 1,
+    },
     USD: {
         name: "미국 달러",
         country: "미국",
@@ -50,16 +56,17 @@ const CURRENCY_META: Record<
 };
 
 export default function HomePage() {
+    const router = useRouter();
     const [currencyList, setCurrencyList] = useState<any[]>([]);
     const [totalKRW, setTotalKRW] = useState(0);
     const [changeRate, setChangeRate] = useState(1.25);
     const [isLoading, setIsLoading] = useState(true);
-    const [isModalOpen, setIsModalOpen] = useState(false);
 
     const fetchHomeData = async () => {
         try {
             const response = await axiosInstance.get("/wallets");
-            const wallets = response.data?.data || [];
+            const rawData = response.data;
+            const wallets = Array.isArray(rawData) ? rawData : rawData?.data || [];
 
             let calculatedTotalKRW = 0;
             const formattedWallets = wallets.map((wallet: any) => {
@@ -68,13 +75,17 @@ export default function HomePage() {
                     country: "기타",
                     flagUrl: "",
                     symbol: wallet.currency,
-                    defaultRate: 1000,
+                    defaultRate: 1,
                 };
 
-                const rate = wallet.exchangeRate || meta.defaultRate;
-                const krwValue = Math.round(
-                    wallet.balance * (wallet.currency === "JPY" ? rate / 100 : rate),
-                );
+                const balanceNum = Number(wallet.balance ?? wallet.amount) || 0;
+                const rate = Number(wallet.exchangeRate) || meta.defaultRate;
+
+                const krwValue =
+                    wallet.currency === "KRW"
+                        ? balanceNum
+                        : Math.round(balanceNum * (wallet.currency === "JPY" ? rate / 100 : rate));
+
                 calculatedTotalKRW += krwValue;
 
                 return {
@@ -82,7 +93,7 @@ export default function HomePage() {
                     currency: wallet.currency,
                     name: meta.name,
                     country: meta.country,
-                    amount: wallet.balance,
+                    amount: balanceNum,
                     krw: krwValue,
                     changeRate: wallet.changeRate ?? 0.42,
                     flagUrl: meta.flagUrl,
@@ -133,41 +144,45 @@ export default function HomePage() {
                     </TextComponent>
                 </View>
 
-                {/* 2. MY WALLET 카드 */}
-                <Card
-                    className="bg-primary-sub flex-row justify-between items-center relative overflow-hidden"
-                    shadow="md">
-                    <View className="z-10">
-                        <TextComponent className="text-sm font-bold text-text-primary mb-2">
-                            MY WALLET
-                        </TextComponent>
-                        <TextComponent className="text-xs text-text-secondary mb-1">
-                            총 자산 (원화 환산)
-                        </TextComponent>
-                        <TextComponent className="text-3xl font-extrabold text-text-primary mb-2">
-                            ₩ {formatNumber(totalKRW)}
-                        </TextComponent>
-                        <TextComponent
-                            className={`text-xs font-bold ${changeRate >= 0 ? "text-success" : "text-error"}`}>
-                            {changeRate >= 0 ? "▲" : "▼"} {Math.abs(changeRate)}% (오늘)
-                        </TextComponent>
-                    </View>
+                {/* 2. MY WALLET 카드 (클릭 시 거래내역 페이지로 이동) */}
+                <TouchableOpacity
+                    activeOpacity={0.9}
+                    onPress={() => router.push("/(main)/(tabs)/(home)/history" as any)}>
+                    <Card
+                        className="bg-primary-sub flex-row justify-between items-center relative overflow-hidden"
+                        shadow="md">
+                        <View className="z-10">
+                            <TextComponent className="text-sm font-bold text-text-primary mb-2">
+                                MY WALLET
+                            </TextComponent>
+                            <TextComponent className="text-xs text-text-secondary mb-1">
+                                총 자산 (원화 환산)
+                            </TextComponent>
+                            <TextComponent className="text-3xl font-extrabold text-text-primary mb-2">
+                                ₩ {formatNumber(totalKRW)}
+                            </TextComponent>
+                            <TextComponent
+                                className={`text-xs font-bold ${changeRate >= 0 ? "text-success" : "text-error"}`}>
+                                {changeRate >= 0 ? "▲" : "▼"} {Math.abs(changeRate)}% (오늘)
+                            </TextComponent>
+                        </View>
 
-                    <Image
-                        source={require("@/assets/images/wallet_illust.png")}
-                        style={{
-                            width: 110,
-                            height: 110,
-                            position: "absolute",
-                            right: 10,
-                            bottom: 0,
-                        }}
-                        resizeMode="contain"
-                    />
-                </Card>
+                        <Image
+                            source={require("@/assets/images/wallet_illust.png")}
+                            style={{
+                                width: 110,
+                                height: 110,
+                                position: "absolute",
+                                right: 10,
+                                bottom: 0,
+                            }}
+                            resizeMode="contain"
+                        />
+                    </Card>
+                </TouchableOpacity>
 
                 {/* 3. 보유 외화 리스트 */}
-                <View className="mb-4 flex-row justify-between items-center">
+                <View className="mb-4 mt-6 flex-row justify-between items-center">
                     <TextComponent className="text-lg font-bold text-text-primary">
                         보유 외화
                     </TextComponent>
@@ -189,7 +204,6 @@ export default function HomePage() {
                                 <View
                                     key={item.id}
                                     className={`flex-row items-center justify-between py-4 ${!isLast ? "border-b border-divider/40" : ""}`}>
-                                    {/* 원형 국기 이미지 및 통화 정보 */}
                                     <View className="flex-row items-center">
                                         <View className="w-11 h-11 rounded-full overflow-hidden border border-divider/50 mr-3.5 bg-gray-100 shadow-sm items-center justify-center">
                                             {item.flagUrl ? (
@@ -221,7 +235,6 @@ export default function HomePage() {
                                         </View>
                                     </View>
 
-                                    {/* 잔액 및 환산 금액 */}
                                     <View className="items-end">
                                         <View className="flex-row items-center mb-1">
                                             <TextComponent className="text-base font-bold text-text-primary mr-2">
@@ -244,12 +257,12 @@ export default function HomePage() {
                 </View>
             </ScrollView>
 
-            {/* 4. 플로팅 버튼 */}
+            {/* 4. 플로팅 버튼 (거래 유형 선택 페이지로 이동) */}
             <View className="absolute bottom-6 right-6">
                 <TouchableOpacity
                     className="w-14 h-14 bg-primary-main rounded-full items-center justify-center shadow-lg"
                     activeOpacity={0.8}
-                    onPress={() => setIsModalOpen(true)}>
+                    onPress={() => router.push("/(main)/(tabs)/(home)/select-type" as any)}>
                     <TextComponent
                         className="text-white text-3xl font-light"
                         style={{ lineHeight: 36, marginTop: -2 }}>
@@ -257,12 +270,6 @@ export default function HomePage() {
                     </TextComponent>
                 </TouchableOpacity>
             </View>
-
-            <CreateWalletModal
-                visible={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                onSuccess={fetchHomeData}
-            />
         </SafeAreaView>
     );
 }
