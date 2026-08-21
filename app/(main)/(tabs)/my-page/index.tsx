@@ -1,8 +1,9 @@
 import { Feather } from "@expo/vector-icons";
-import { Pressable, ScrollView, Switch, View } from "react-native";
+import { Pressable, ScrollView, View } from "react-native";
 import { useRouter } from "expo-router";
 import TextComponent from "@/components/common/text/TextComponent";
 import { useAuthStore } from "@/stores/auth/useAuthStore";
+import Title from "@/components/common/title/Title";
 
 export default function MyPage() {
     const router = useRouter();
@@ -20,15 +21,15 @@ export default function MyPage() {
         }
 
         switch (menu) {
-            case "edit-profile":
+            case "profile":
                 router.push("/my-page/edit-profile");
                 break;
 
-            case "change-password":
+            case "password":
                 router.push("/my-page/change-password");
                 break;
 
-            case "inquiries":
+            case "inquiry":
                 router.push("/my-page/inquiries");
                 break;
 
@@ -49,36 +50,41 @@ export default function MyPage() {
                 contentContainerStyle={{
                     paddingBottom: 120,
                 }}>
-
-                <View className="px-6 pt-6 pb-5">
-                    <TextComponent className="text-xl font-bold text-text-default">
-                        마이페이지
-                    </TextComponent>
-                </View>
+                {/*<View className="px-5 pt-7 pb-8">*/}
+                {/*    <Title*/}
+                {/*        title="마이페이지"*/}
+                {/*        className="h-auto px-0"*/}
+                {/*        textClassName="text-[28px]"*/}
+                {/*    />*/}
+                {/*</View>*/}
 
                 {isLoggedIn ? (
-                    <View className="mx-5 mb-6 rounded-3xl bg-white">
+                    <View className="mx-5 mb-6 rounded-md bg-white px-4 py-6">
                         <View className="flex-row items-center">
-                            <View className="h-16 w-16 items-center justify-center overflow-hidden rounded-full bg-secondary-main">
-                                <TextComponent className="text-3xl">🧳</TextComponent>
-                            </View>
-
                             {/* 사용자 정보 */}
-                            <View className="ml-4 flex-1">
+                            <View className="ml-4">
+                                <View className={"flex-row items-center"}>
                                 <TextComponent className="text-lg font-bold text-primary-main">
-                                    {user?.nickname ?? "여행자님"}
+                                    {user?.nickname ?? "여행자"}님
                                 </TextComponent>
 
-                                <TextComponent className="mt-1 text-xs text-gray-500">
+                                <TextComponent className="mt-1 text-sm font-bold text-primary-main">
+                                    {" "}어디로 떠나볼까요?
+                                </TextComponent>
+                                </View>
+
+                                <TextComponent className="mt-1 text-xs text-text-tertiary">
                                     {user?.email ?? "travel@example.com"}
                                 </TextComponent>
+
+
                             </View>
                         </View>
                     </View>
                 ) : (
                     <Pressable
                         onPress={handleLogin}
-                        className="mx-5 mb-6 flex-row items-center rounded-3xl bg-primary-main px-5 py-5">
+                        className="mx-5 mb-6 flex-row items-center rounded-md bg-primary-main px-5 py-5">
                         {/* 로그인 아이콘 */}
                         <View className="h-14 w-14 items-center justify-center rounded-full bg-white/70">
                             <Feather name="user" size={24} color="#6FA89E" />
@@ -115,7 +121,6 @@ export default function MyPage() {
                         title="비밀번호 수정"
                         onPress={() => handleMenuPress("password")}
                     />
-
                 </MenuSection>
 
                 {/* ========================= */}
@@ -132,7 +137,7 @@ export default function MyPage() {
                     <MenuItem
                         icon="message-circle"
                         title="공지사항"
-                        onPress={() => handleMenuPress("announcement")}
+                        onPress={() => handleMenuPress("notice")}
                     />
                 </MenuSection>
 
@@ -170,7 +175,7 @@ interface MenuSectionProps {
 function MenuSection({ title, children }: MenuSectionProps) {
     return (
         <View className="px-6">
-            <TextComponent className="mb-2 mt-4 text-sm font-bold text-gray-500">
+            <TextComponent className="mb-2 mt-4 text-sm font-bold text-text-secondary">
                 {title}
             </TextComponent>
 
@@ -194,14 +199,14 @@ function MenuItem({ icon, title, onPress }: MenuItemProps) {
         <Pressable onPress={onPress} className="flex-row items-center py-4">
             {/* 아이콘 */}
             <View className="w-8 items-center">
-                <Feather name={icon} size={21} color="#777777" />
+                <Feather name={icon} size={21} className={"text-text-tertiary"} />
             </View>
 
             {/* 텍스트 */}
-            <TextComponent className="ml-3 flex-1 text-sm text-text-default">{title}</TextComponent>
+            <TextComponent className="ml-3 flex-1 text-sm text-text-secondary">{title}</TextComponent>
 
             {/* 화살표 */}
-            <Feather name="chevron-right" size={20} color="#999999" />
+            <Feather name="chevron-right" size={20} className={"text-text-tertiary"} />
         </Pressable>
     );
 }

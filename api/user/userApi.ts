@@ -52,3 +52,40 @@ export const loginUser = async (request: LoginUserRequest): Promise<LoginData> =
 
     return response.data.data;
 };
+
+/* ========================================
+   내 정보 조회
+======================================== */
+
+export interface GetMeResponse {
+    message: string;
+    data: User;
+}
+
+export const getMe = async (): Promise<GetMeResponse> => {
+    const response = await api.get<GetMeResponse>("/users/me");
+
+    return response.data;
+};
+
+/* ========================================
+   회원정보 수정
+======================================== */
+
+export interface UpdateUserRequest {
+    nickname: string;
+    phoneNumber: string;
+    gender: "MALE" | "FEMALE";
+    birthdate: string;
+}
+
+export interface UpdateUserResponse {
+    message: string;
+    data: User;
+}
+
+export const updateUser = async (request: UpdateUserRequest): Promise<UpdateUserResponse> => {
+    const response = await api.patch<UpdateUserResponse>("/users/update", request);
+
+    return response.data;
+};
