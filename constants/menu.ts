@@ -9,7 +9,7 @@ export const USER_NAV_LIST = [
     },
     {
         name: "여행",
-        path: "/travel",
+        path: "/trips",
         iconComponent: Feather,
         iconName: "map-pin",
     },
