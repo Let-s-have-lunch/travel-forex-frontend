@@ -89,3 +89,37 @@ export const updateUser = async (request: UpdateUserRequest): Promise<UpdateUser
 
     return response.data;
 };
+
+/* ========================================
+   비밀번호 변경
+======================================== */
+
+export interface UpdatePasswordRequest {
+    prevPassword: string;
+    password: string;
+    confirmPassword: string;
+}
+
+export interface UpdatePasswordResponse {
+    message: string;
+}
+
+export const updatePassword = async (
+    request: UpdatePasswordRequest,
+): Promise<UpdatePasswordResponse> => {
+    const response = await api.patch<UpdatePasswordResponse>(
+        "/users/password",
+        request,
+    );
+
+    return response.data;
+};
+
+/* ========================================
+   회원 탈퇴
+======================================== */
+
+export const deleteUser = async () => {
+    const response = await api.delete("/users/me");
+    return response.data;
+};

@@ -3,7 +3,6 @@ import { Pressable, ScrollView, View } from "react-native";
 import { useRouter } from "expo-router";
 import TextComponent from "@/components/common/text/TextComponent";
 import { useAuthStore } from "@/stores/auth/useAuthStore";
-import Title from "@/components/common/title/Title";
 
 export default function MyPage() {
     const router = useRouter();
@@ -23,10 +22,6 @@ export default function MyPage() {
         switch (menu) {
             case "profile":
                 router.push("/my-page/edit-profile");
-                break;
-
-            case "password":
-                router.push("/my-page/change-password");
                 break;
 
             case "inquiry":
@@ -50,13 +45,6 @@ export default function MyPage() {
                 contentContainerStyle={{
                     paddingBottom: 120,
                 }}>
-                {/*<View className="px-5 pt-7 pb-8">*/}
-                {/*    <Title*/}
-                {/*        title="마이페이지"*/}
-                {/*        className="h-auto px-0"*/}
-                {/*        textClassName="text-[28px]"*/}
-                {/*    />*/}
-                {/*</View>*/}
 
                 {isLoggedIn ? (
                     <View className="mx-5 mb-6 rounded-md bg-white px-4 py-6">
@@ -114,12 +102,6 @@ export default function MyPage() {
                         icon="user"
                         title="프로필 관리"
                         onPress={() => handleMenuPress("profile")}
-                    />
-
-                    <MenuItem
-                        icon="lock"
-                        title="비밀번호 수정"
-                        onPress={() => handleMenuPress("password")}
                     />
                 </MenuSection>
 
