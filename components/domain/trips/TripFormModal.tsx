@@ -8,6 +8,7 @@ import {
     Pressable,
     Keyboard,
     TouchableOpacity,
+    ScrollView,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { format } from "date-fns";
@@ -21,7 +22,7 @@ import Input from "@/components/common/input/Input";
 import TextComponent from "@/components/common/text/TextComponent";
 
 import { tripSchema, TripInputType } from "@/schemas/trip/tripSchema";
-import { Trip } from "@/types/trip";
+import { Trip, CurrencyCodeList } from "@/types/trip"; // 🆕 CurrencyCodeList 임포트
 import Title from "@/components/common/title/Title";
 
 interface TripFormModalProps {
@@ -30,6 +31,16 @@ interface TripFormModalProps {
     onSubmit: (data: TripInputType) => void;
     initialData?: Trip | null; // null이면 추가, 데이터가 있으면 수정 모드
 }
+
+// 🆕 통화별 라벨 매핑 객체
+const CURRENCY_LABELS: Record<string, string> = {
+    JPY: "🇯🇵 일본 (JPY)",
+    USD: "🇺🇸 미국 (USD)",
+    EUR: "🇪🇺 유럽 (EUR)",
+    GBP: "🇬🇧 영국 (GBP)",
+    CNY: "🇨🇳 중국 (CNY)",
+    KRW: "🇰🇷 한국 (KRW)",
+};
 
 export default function TripFormModal({
     visible,
@@ -56,6 +67,7 @@ export default function TripFormModal({
             startDate: "",
             endDate: "",
             budgetKrw: 0,
+            currency: "JPY", // 🆕 기본 통화 설정
         },
     });
 
@@ -67,9 +79,10 @@ export default function TripFormModal({
                     startDate: initialData.startDate,
                     endDate: initialData.endDate,
                     budgetKrw: initialData.budgetKrw,
+                    currency: initialData.currency || "JPY", // 🛠️ 수정 시 기존 통화 불러오기
                 });
             } else {
-                reset({ title: "", startDate: "", endDate: "", budgetKrw: 0 });
+                reset({ title: "", startDate: "", endDate: "", budgetKrw: 0, currency: "JPY" });
             }
         }
     }, [visible, initialData, reset]);
@@ -186,7 +199,42 @@ export default function TripFormModal({
                             )}
                         />
 
-                        {/* 2. 시작일 */}
+                        <Controller
+                            control={control}
+                            name="currency"
+                            render={({ field: { onChange, value } }) => (
+                                <InputGroup
+                                    label="기준 통화 (국가)"
+                                    errorMessage={errors.currency?.message}>
+                                    <View className="flex-row flex-wrap gap-2">
+                                        {CurrencyCodeList.map(curr => {
+                                            const isSelected = value === curr;
+                                            return (
+                                                <Pressable
+                                                    key={curr}
+                                                    onPress={() => onChange(curr)}
+                                                    className={`px-4 py-2.5 rounded-full border ${
+                                                        isSelected
+                                                            ? "bg-primary-main border-primary-main"
+                                                            : "bg-surface border-divider"
+                                                    }`}>
+                                                    <TextComponent
+                                                        className={`text-sm ${
+                                                            isSelected
+                                                                ? "text-white font-bold"
+                                                                : "text-text-secondary"
+                                                        }`}>
+                                                        {CURRENCY_LABELS[curr] || curr}
+                                                    </TextComponent>
+                                                </Pressable>
+                                            );
+                                        })}
+                                    </View>
+                                </InputGroup>
+                            )}
+                        />
+
+                        {/* 3. 시작일 */}
                         <Controller
                             control={control}
                             name="startDate"
@@ -203,7 +251,7 @@ export default function TripFormModal({
                             )}
                         />
 
-                        {/* 3. 종료일 */}
+                        {/* 4. 종료일 */}
                         <Controller
                             control={control}
                             name="endDate"
@@ -220,7 +268,7 @@ export default function TripFormModal({
                             )}
                         />
 
-                        {/* 4. 총 예산 */}
+                        {/* 5. 총 예산 */}
                         <Controller
                             control={control}
                             name="budgetKrw"
@@ -264,7 +312,7 @@ export default function TripFormModal({
                             </TextComponent>
                         )}
 
-                        {/* 5. 하단 버튼 영역 */}
+                        {/* 6. 하단 버튼 영역 */}
                         <View className="flex-row mt-6 gap-3">
                             <Button variant="outlined" wrap={true} onPress={onClose}>
                                 취소

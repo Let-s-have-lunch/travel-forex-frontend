@@ -1,22 +1,22 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { Image } from "react-native";
 import TextComponent from "@/components/common/text/TextComponent";
 import { Alert, FlatList, Platform, Pressable, TouchableOpacity, View } from "react-native";
 import LoadingIndicator from "@/components/common/loading/Loading";
 import Button from "@/components/common/button/Button";
 import { Feather } from "@expo/vector-icons";
-import Card from "@/components/common/card/Card";
 import Pagination from "@/components/common/pagination/Pagination";
 import { Trip } from "@/types/trip";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import tripApi from "@/api/user/tripApi";
 import TripFormModal from "@/components/domain/trips/TripFormModal";
 import { TripInputType } from "@/schemas/trip/tripSchema";
-import { format } from "date-fns";
 import Title from "@/components/common/title/Title";
+import { TabType } from "@/types/status";
+import Card from "@/components/common/card/Card";
+import { getTripThumbnail } from "@/utils/tripImage";
 
-type TabType = "ONGOING" | "PAST";
-
-export default function TripListPage({ navigation }: any) {
+export default function TripListPage() {
     const router = useRouter();
     const [trips, setTrips] = useState<Trip[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
@@ -34,11 +34,13 @@ export default function TripListPage({ navigation }: any) {
     const currentPage = Number(page) || 1;
     const pageSize = Number(size) || 5;
 
+    // 🛠️ [수정] status 파라미터 추가 (ONGOING 또는 PAST)
     const fetchTrips = useCallback(
-        async (targetPage: number, targetSize: number) => {
+        async (targetPage: number, targetSize: number, status: TabType) => {
             setLoading(true);
             try {
-                const result = await tripApi.fetchTripList(targetPage, targetSize);
+                // 🛠️ [수정] 백엔드 API 호출 시 status 값 전달
+                const result = await tripApi.fetchTripList(targetPage, targetSize, status);
                 setTrips(result.list || []);
                 setTotal(result.total ?? result.list?.length ?? 0);
             } catch (error) {
@@ -57,40 +59,32 @@ export default function TripListPage({ navigation }: any) {
         [router],
     );
 
+    // 🛠️ [수정] 렌더링 시 fetchTrips에 현재 activeTab을 인자로 넘김
     useEffect(() => {
-        fetchTrips(currentPage, pageSize).then(() => {});
-    }, [currentPage, fetchTrips, pageSize]);
+        fetchTrips(currentPage, pageSize, activeTab).then(() => {});
+    }, [currentPage, fetchTrips, pageSize, activeTab]); // 🆕 [추가] 의존성 배열에 activeTab 추가
 
-    /* ========================================
-       탭(진행중 / 지난 여행) 필터링 로직 추가
-    ======================================== */
-    const filteredTrips = useMemo(() => {
-        const todayStr = format(new Date(), "yyyy-MM-dd");
-
-        return trips.filter(item => {
-            if (activeTab === "ONGOING") {
-                // 종료일이 오늘과 같거나 미래인 경우
-                return item.endDate >= todayStr;
-            } else {
-                // 종료일이 오늘보다 이전인 경우
-                return item.endDate < todayStr;
-            }
-        });
-    }, [trips, activeTab]);
-
-    const totalPages = Math.ceil(filteredTrips.length / pageSize) || 1;
+    // 공지사항과 동일한 계산 방식 적용 (전체 개수 total 기준)
+    const totalPages = Math.ceil(total / pageSize) || 1;
 
     // 페이지 변경 핸들러
     const handlePageChange = (newPage: number) => {
         setSelectedMenuTripId(null);
-        router.setParams({ page: String(newPage) });
+        router.setParams({ page: String(newPage), size: String(pageSize) });
+    };
+
+    // 탭 전환 핸들러 (1페이지로 이동)
+    const handleTabChange = (tab: TabType) => {
+        setSelectedMenuTripId(null);
+        setActiveTab(tab);
+        router.setParams({ page: "1", size: String(pageSize) });
     };
 
     // 삭제 API 실행
     const confirmDelete = async (id: number) => {
         try {
             await tripApi.deleteTrip(id);
-            await fetchTrips(currentPage, pageSize);
+            await fetchTrips(currentPage, pageSize, activeTab); // 🛠️ [수정] 삭제 후 목록 갱신 시 activeTab 전달
         } catch (error) {
             console.log(error);
             if (Platform.OS === "web") {
@@ -134,7 +128,7 @@ export default function TripListPage({ navigation }: any) {
         } else {
             await tripApi.createTrip(data);
         }
-        await fetchTrips(currentPage, pageSize);
+        await fetchTrips(currentPage, pageSize, activeTab); // 🛠️ [수정] 추가/수정 후 목록 갱신 시 activeTab 전달
     };
 
     const calculateDays = (start: string, end: string) => {
@@ -163,7 +157,16 @@ export default function TripListPage({ navigation }: any) {
                         router.push(`/trips/${item.id}`);
                     }}>
                     <Card className="flex-row items-center p-4 relative">
-                        <View className="w-16 h-16 rounded-2xl bg-primary-sub mr-4 overflow-hidden" />
+                        <View className="w-16 h-[88px] rounded-xl bg-primary-sub mr-4 overflow-hidden">
+                            <Image
+                                source={getTripThumbnail(item.currency)}
+                                style={{
+                                    width: "100%",
+                                    height: "100%",
+                                }}
+                                resizeMode="cover"
+                            />
+                        </View>
 
                         <View className="flex-1 justify-center gap-1 pr-6">
                             <TextComponent className="text-lg font-bold text-text-primary">
@@ -239,6 +242,7 @@ export default function TripListPage({ navigation }: any) {
         );
     };
 
+
     return (
         <View className="flex-1 bg-background">
             <Title title="여행 목록" showBackButton={true} onBackPress={() => router.back()}>
@@ -264,11 +268,7 @@ export default function TripListPage({ navigation }: any) {
                     variant={activeTab === "ONGOING" ? "contained" : "outlined"}
                     shape="rounded"
                     color="primary"
-                    onPress={() => {
-                        setSelectedMenuTripId(null);
-                        setActiveTab("ONGOING");
-                        router.setParams({ page: "1" });
-                    }}
+                    onPress={() => handleTabChange("ONGOING")}
                     className={activeTab === "ONGOING" ? "" : "border-border bg-surface"}
                     textClassName={activeTab === "ONGOING" ? "" : "text-text-tertiary"}>
                     진행중
@@ -278,11 +278,7 @@ export default function TripListPage({ navigation }: any) {
                     variant={activeTab === "PAST" ? "contained" : "outlined"}
                     shape="rounded"
                     color="primary"
-                    onPress={() => {
-                        setSelectedMenuTripId(null);
-                        setActiveTab("PAST");
-                        router.setParams({ page: "1" });
-                    }}
+                    onPress={() => handleTabChange("PAST")}
                     className={activeTab === "PAST" ? "" : "border-border bg-surface"}
                     textClassName={activeTab === "PAST" ? "" : "text-text-tertiary"}>
                     지난 여행
@@ -294,7 +290,7 @@ export default function TripListPage({ navigation }: any) {
                 <LoadingIndicator />
             ) : (
                 <FlatList
-                    data={filteredTrips} // 👈 필터링된 데이터 전달
+                    data={trips}
                     keyExtractor={item => item.id.toString()}
                     renderItem={renderTripItem}
                     contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 20 }}
