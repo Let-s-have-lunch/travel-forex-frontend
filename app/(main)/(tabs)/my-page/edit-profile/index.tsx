@@ -11,7 +11,7 @@ import Button from "@/components/common/button/Button";
 import InputGroup from "@/components/common/input/InputGroup";
 import Title from "@/components/common/title/Title";
 
-import { getMe, updateUser } from "@/api/user/userApi";
+import { getMe, updateUser, deleteUser } from "@/api/user/userApi";
 import { useAuthStore } from "@/stores/auth/useAuthStore";
 
 const profileSchema = z.object({
@@ -122,7 +122,7 @@ export default function ProfileScreen() {
             setIsSaving(true);
 
             const response = await updateUser(data);
-            console.log("수정완료")
+            console.log("수정완료");
 
             if (Platform.OS === "web") {
                 window.alert(response.message || "회원정보가 성공적으로 수정되었습니다.");
@@ -171,7 +171,62 @@ export default function ProfileScreen() {
             setIsSaving(false);
         }
     };
+    /**
+     * ========================================
+     * 회원 탈퇴
+     * ========================================
+     */
+    const handleDeleteUser = () => {
+        console.log("회원 탈퇴 버튼 눌림");
 
+        if (Platform.OS === "web") {
+            const confirmed = window.confirm("정말 탈퇴하시겠습니까?");
+
+            if (confirmed) {
+                deleteUser();
+            }
+
+            return;
+        }
+
+        Alert.alert("회원 탈퇴", "정말 탈퇴하시겠습니까?", [
+            {
+                text: "취소",
+                style: "cancel",
+            },
+            {
+                text: "확인",
+                style: "destructive",
+                onPress: async () => {
+                    try {
+                        const response = await deleteUser();
+
+                        console.log("회원 탈퇴 완료:", response);
+
+                        useAuthStore.getState().logout();
+
+                        Alert.alert(
+                            "탈퇴 완료",
+                            response.message || "회원 탈퇴가 완료되었습니다.",
+                            [
+                                {
+                                    text: "확인",
+                                    onPress: () => router.replace("/auth/login"),
+                                },
+                            ],
+                        );
+                    } catch (error: any) {
+                        console.error("회원 탈퇴 실패:", error);
+
+                        const status = error.response?.status;
+                        const message = error.response?.data?.message;
+
+                        Alert.alert("탈퇴 실패", message || "회원 탈퇴 중 오류가 발생했습니다.");
+                    }
+                },
+            },
+        ]);
+    };
     /**
      * ========================================
      * 로딩 화면
@@ -234,7 +289,7 @@ export default function ProfileScreen() {
                         <InputGroup label="이메일" size="small">
                             <View className="h-[48px] justify-center px-4 rounded-md bg-primary-sub">
                                 <TextComponent className="text-text-secondary">
-                                   {user?.email}
+                                    {user?.email}
                                 </TextComponent>
                             </View>
                         </InputGroup>
@@ -374,7 +429,7 @@ export default function ProfileScreen() {
                             onPress={() => router.push("/my-page/change-password")}
                             className="w-full px-0 py-4 border-b border-border">
                             <View className="flex-row items-center justify-between w-full">
-                                <TextComponent className="text-[15px] text-text-">
+                                <TextComponent className="text-[15px] text-text-primary">
                                     비밀번호 변경
                                 </TextComponent>
 
@@ -388,7 +443,10 @@ export default function ProfileScreen() {
                             variant="text"
                             color="primary"
                             size="medium"
-                            onPress={() => router.push("/")}
+                            onPress={() => {
+                                console.log("회원 탈퇴 버튼 눌림");
+                                handleDeleteUser();
+                            }}
                             className="w-full px-0 py-4">
                             <View className="flex-row items-center justify-between w-full">
                                 <TextComponent className="text-[15px] text-error">

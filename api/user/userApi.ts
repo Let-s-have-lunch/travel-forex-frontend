@@ -114,3 +114,12 @@ export const updatePassword = async (
 
     return response.data;
 };
+
+/* ========================================
+   회원 탈퇴
+======================================== */
+
+export const deleteUser = async () => {
+    const response = await api.delete("/users/me");
+    return response.data;
+};
