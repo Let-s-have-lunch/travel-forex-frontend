@@ -4,15 +4,13 @@ import { useRouter } from "expo-router";
 import { Feather } from "@expo/vector-icons";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-
 import TextComponent from "@/components/common/text/TextComponent";
-import InputGroup from "@/components/common/input/InputGroup";
-import Input from "@/components/common/input/Input";
 import Button from "@/components/common/button/Button";
-
+import Input from "@/components/common/input/Input";
+import InputGroup from "@/components/common/input/InputGroup";
+import Title from "@/components/common/title/Title";
 import { createUser } from "@/api/user/userApi";
 import { RegisterUserInputType, registerUserSchema } from "@/schemas/user/registerUserSchema";
-import Title from "@/components/common/title/title";
 
 export default function RegisterScreen() {
     const router = useRouter();
@@ -20,8 +18,7 @@ export default function RegisterScreen() {
     const {
         control,
         handleSubmit,
-        setError,
-        formState: { errors, isSubmitting },
+        formState: { errors },
     } = useForm({
         resolver: zodResolver(registerUserSchema),
         mode: "onTouched",
@@ -47,8 +44,6 @@ export default function RegisterScreen() {
             const { confirmPassword, ...request } = data;
 
             const response = await createUser(request);
-
-            console.log("회원가입 성공:", response);
 
             if (Platform.OS === "web") {
                 window.alert("회원가입 완료\n성공적으로 회원가입 되었습니다.");
@@ -110,12 +105,26 @@ export default function RegisterScreen() {
                 keyboardShouldPersistTaps="handled"
                 showsVerticalScrollIndicator={false}>
                 <View className="px-[24px] pt-[36px]">
+                    {/* ========================================
+                        뒤로가기
+                    ======================================== */}
+
+                    <Button
+                        variant="icon"
+                        color="primary"
+                        size="small"
+                        shape="circle"
+                        onPress={() => router.back()}
+                        className="w-[30px] h-[40px] p-0 bg-[#F1F3F2]">
+                        <Feather name="chevron-left" size={26} color="#3F4643" />
+                    </Button>
+
                     {/* 타이틀 */}
                     <Title
                         title="회원가입"
                         description="여행과 자산을 한 곳에서 관리해보세요."
-                        className="h-auto px-0 py-5 mb-10"
-                        showBackButton={true}
+                        className="h-auto px-0 items-start py-5 mb-8"
+                        textClassName="text-[28px]"
                     />
 
                     <View>

@@ -27,7 +27,7 @@ function Input({
                 ["w-full", "flex-row"],
                 ["items-center"],
                 ["rounded-md"],
-                ["bg-bg-paper"],
+                ["bg-transparent"],
                 !hideBorder && "border",
                 !hideBorder &&
                     (hasError

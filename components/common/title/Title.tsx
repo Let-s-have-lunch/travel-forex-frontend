@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { View } from "react-native";
-import { twMerge } from "tailwind-merge";
 import { Feather } from "@expo/vector-icons";
+import { twMerge } from "tailwind-merge";
 
 import TextComponent from "@/components/common/text/TextComponent";
 import Button from "@/components/common/button/Button";
@@ -25,9 +25,9 @@ function Title({
     description,
     children,
     className,
-    leftIcon,
     textClassName,
     forceCenter = false,
+    leftIcon,
 }: Props) {
     const isCentered = showBackButton || forceCenter;
 
@@ -46,7 +46,8 @@ function Title({
                         shape="rounded"
                         onPress={onBackPress}
                         className="p-1"
-                        textClassName="text-text-default">
+                        textClassName="text-text-default"
+                        accessibilityLabel="뒤로가기">
                         {leftIcon ?? (
                             <Feather name="chevron-left" size={26} className="text-text-default" />
                         )}
