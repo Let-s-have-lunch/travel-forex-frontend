@@ -1,15 +1,13 @@
 import { Feather } from "@expo/vector-icons";
 import { Pressable, ScrollView, Switch, View } from "react-native";
 import { useRouter } from "expo-router";
-
 import TextComponent from "@/components/common/text/TextComponent";
-import Button from "@/components/common/button/Button";
 import { useAuthStore } from "@/stores/auth/useAuthStore";
 
 export default function MyPage() {
     const router = useRouter();
 
-    const { user, isLoggedIn } = useAuthStore();
+    const { user, isLoggedIn, logout } = useAuthStore();
 
     const handleLogin = () => {
         router.push("/auth/login");
@@ -22,54 +20,45 @@ export default function MyPage() {
         }
 
         switch (menu) {
-            case "profile":
-                router.push("/my-page");
+            case "edit-profile":
+                router.push("/my-page/edit-profile");
                 break;
 
-            case "password":
-                router.push("/my-page");
+            case "change-password":
+                router.push("/my-page/change-password");
                 break;
 
-            case "notification":
-                router.push("/my-page");
+            case "inquiries":
+                router.push("/my-page/inquiries");
                 break;
 
-            case "inquiry":
-                router.push("/my-page");
-                break;
-
-            case "announcement":
-                router.push("/my-page");
+            case "notice":
+                router.push("/my-page/notice");
                 break;
 
             case "logout":
-                // logout 처리
+                logout();
                 break;
         }
     };
 
     return (
-        <View className="flex-1 ">
+        <View className="flex-1">
             <ScrollView
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={{
                     paddingBottom: 120,
                 }}>
-                {/* 페이지 제목 */}
+
                 <View className="px-6 pt-6 pb-5">
                     <TextComponent className="text-xl font-bold text-text-default">
                         마이페이지
                     </TextComponent>
                 </View>
 
-                {/* ========================= */}
-                {/* 프로필 영역 */}
-                {/* ========================= */}
-
                 {isLoggedIn ? (
                     <View className="mx-5 mb-6 rounded-3xl bg-white">
                         <View className="flex-row items-center">
-                            {/* 프로필 이미지 */}
                             <View className="h-16 w-16 items-center justify-center overflow-hidden rounded-full bg-secondary-main">
                                 <TextComponent className="text-3xl">🧳</TextComponent>
                             </View>
@@ -101,9 +90,9 @@ export default function MyPage() {
                                 로그인이 필요해요
                             </TextComponent>
 
-                            {/*<TextComponent className="mt-1 text-xs text-white/80">*/}
-                            {/*    로그인하고 여행 기록을 관리해보세요*/}
-                            {/*</TextComponent>*/}
+                            <TextComponent className="mt-1 text-xs text-white/80">
+                                로그인하고 여행 기록을 관리해보세요
+                            </TextComponent>
                         </View>
 
                         <Feather name="chevron-right" size={22} color="#FFFFFF" />
@@ -146,7 +135,24 @@ export default function MyPage() {
                         onPress={() => handleMenuPress("announcement")}
                     />
                 </MenuSection>
-                
+
+                {/* ========================= */}
+                {/* 기타 */}
+                {/* ========================= */}
+
+                <MenuSection title="기타">
+                    <MenuItem
+                        icon="log-out"
+                        title={isLoggedIn ? "로그아웃" : "로그인"}
+                        onPress={() => {
+                            if (isLoggedIn) {
+                                handleMenuPress("logout");
+                            } else {
+                                handleLogin();
+                            }
+                        }}
+                    />
+                </MenuSection>
             </ScrollView>
         </View>
     );
