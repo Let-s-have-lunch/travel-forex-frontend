@@ -1,5 +1,14 @@
 import { useEffect, useState } from "react";
-import { Alert, KeyboardAvoidingView, Platform, ScrollView, View } from "react-native";
+import {
+    Alert,
+    KeyboardAvoidingView,
+    Modal,
+    Pressable,
+    Platform,
+    ScrollView,
+    View,
+    TextInput,
+} from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
@@ -11,8 +20,9 @@ import Button from "@/components/common/button/Button";
 import InputGroup from "@/components/common/input/InputGroup";
 import Title from "@/components/common/title/Title";
 
-import { getMe, updateUser, deleteUser } from "@/api/user/userApi";
+import { getMe, updateUser, withdrawUser } from "@/api/user/userApi";
 import { useAuthStore } from "@/stores/auth/useAuthStore";
+import Input from "@/components/common/input/Input";
 
 const profileSchema = z.object({
     nickname: z
@@ -36,9 +46,12 @@ type ProfileFormType = z.infer<typeof profileSchema>;
 export default function ProfileScreen() {
     const router = useRouter();
 
-    const { user } = useAuthStore();
+    const { user, setUser } = useAuthStore();
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
+    const [isWithdrawModalVisible, setIsWithdrawModalVisible] = useState(false);
+    const [withdrawPassword, setWithdrawPassword] = useState("");
+    const [isWithdrawing, setIsWithdrawing] = useState(false);
 
     const {
         control,
@@ -122,6 +135,14 @@ export default function ProfileScreen() {
             setIsSaving(true);
 
             const response = await updateUser(data);
+
+            if (user) {
+                setUser({
+                    ...user,
+                    ...data,
+                });
+            }
+
             console.log("수정완료");
 
             if (Platform.OS === "web") {
@@ -177,14 +198,16 @@ export default function ProfileScreen() {
      * ========================================
      */
     const handleDeleteUser = () => {
-        console.log("회원 탈퇴 버튼 눌림");
-
         if (Platform.OS === "web") {
             const confirmed = window.confirm("정말 탈퇴하시겠습니까?");
 
-            if (confirmed) {
-                deleteUser();
+            if (!confirmed) {
+                return;
             }
+
+            // 웹에서도 앱 Modal 열기
+            setWithdrawPassword("");
+            setIsWithdrawModalVisible(true);
 
             return;
         }
@@ -197,36 +220,58 @@ export default function ProfileScreen() {
             {
                 text: "확인",
                 style: "destructive",
-                onPress: async () => {
-                    try {
-                        const response = await deleteUser();
-
-                        console.log("회원 탈퇴 완료:", response);
-
-                        useAuthStore.getState().logout();
-
-                        Alert.alert(
-                            "탈퇴 완료",
-                            response.message || "회원 탈퇴가 완료되었습니다.",
-                            [
-                                {
-                                    text: "확인",
-                                    onPress: () => router.replace("/auth/login"),
-                                },
-                            ],
-                        );
-                    } catch (error: any) {
-                        console.error("회원 탈퇴 실패:", error);
-
-                        const status = error.response?.status;
-                        const message = error.response?.data?.message;
-
-                        Alert.alert("탈퇴 실패", message || "회원 탈퇴 중 오류가 발생했습니다.");
-                    }
+                onPress: () => {
+                    setWithdrawPassword("");
+                    setIsWithdrawModalVisible(true);
                 },
             },
         ]);
     };
+
+    const handleWithdraw = async (password: string) => {
+        try {
+            setIsWithdrawing(true);
+
+            const response = await withdrawUser({
+                password,
+            });
+
+            console.log("회원 탈퇴 성공:", response);
+
+            useAuthStore.getState().logout();
+
+            if (Platform.OS === "web") {
+                window.alert(response.message || "회원 탈퇴가 성공적으로 처리되었습니다.");
+
+                router.replace("/auth/login");
+            } else {
+                Alert.alert(
+                    "탈퇴 완료",
+                    response.message || "회원 탈퇴가 성공적으로 처리되었습니다.",
+                    [
+                        {
+                            text: "확인",
+                            onPress: () => router.replace("/auth/login"),
+                        },
+                    ],
+                );
+            }
+        } catch (error: any) {
+            console.error("회원 탈퇴 실패:", error);
+
+            const status = error.response?.status;
+            const message = error.response?.data?.message;
+
+            if (Platform.OS === "web") {
+                window.alert(message || "회원 탈퇴 중 오류가 발생했습니다.");
+            } else {
+                Alert.alert("탈퇴 실패", message || "회원 탈퇴 중 오류가 발생했습니다.");
+            }
+        } finally {
+            setIsWithdrawing(false);
+        }
+    };
+      
     /**
      * ========================================
      * 로딩 화면
@@ -244,7 +289,7 @@ export default function ProfileScreen() {
 
     return (
         <KeyboardAvoidingView
-            className="flex-1 bg-bg-default"
+            className="flex-1"
             behavior={Platform.OS === "ios" ? "padding" : undefined}>
             <ScrollView
                 className="flex-1"
@@ -416,7 +461,7 @@ export default function ProfileScreen() {
                     ======================================== */}
 
                     <View className="mt-10">
-                        <TextComponent className="text-[15px] font-semibold text-text-default mb-3">
+                        <TextComponent className="text-[15px] font-semibold text-text-primary mb-3">
                             계정 관리
                         </TextComponent>
 
@@ -459,6 +504,74 @@ export default function ProfileScreen() {
                     </View>
                 </View>
             </ScrollView>
+            <Modal
+                visible={isWithdrawModalVisible}
+                transparent
+                animationType="fade"
+                onRequestClose={() => {
+                    if (!isWithdrawing) {
+                        setIsWithdrawModalVisible(false);
+                        setWithdrawPassword("");
+                    }
+                }}>
+                <View className="flex-1 bg-black/50 items-center justify-center px-6">
+                    <View className="w-full rounded-2xl bg-surface p-6">
+                        {/* 제목 */}
+                        <TextComponent className="text-lg font-bold text-text-primary mb-2">
+                            현재 비밀번호 입력
+                        </TextComponent>
+
+                        {/* 설명 */}
+                        <TextComponent className="text-[12px] text-text-secondary mb-5">
+                            회원 탈퇴를 위해 현재 비밀번호를 입력해주세요.
+                        </TextComponent>
+
+                        {/* 비밀번호 입력 */}
+                        <InputGroup label="비밀번호" size="small" className="mb-5">
+                            <Input
+                                value={withdrawPassword}
+                                onChangeText={setWithdrawPassword}
+                                placeholder="현재 비밀번호를 입력해주세요"
+                                secureTextEntry
+                                editable={!isWithdrawing}
+                                size="small"
+                            />
+                        </InputGroup>
+
+                        {/* 버튼 */}
+                        <View className="flex-row gap-3">
+                            {/* 취소 */}
+                            <Button
+                                variant="outlined"
+                                color="primary"
+                                size="medium"
+                                shape="rounded"
+                                wrap
+                                disabled={isWithdrawing}
+                                onPress={() => {
+                                    setIsWithdrawModalVisible(false);
+                                    setWithdrawPassword("");
+                                }}
+                                className="h-[52px] border-divider">
+                                취소
+                            </Button>
+
+                            {/* 탈퇴하기 */}
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                size="medium"
+                                shape="rounded"
+                                wrap
+                                disabled={isWithdrawing}
+                                onPress={() => handleWithdraw(withdrawPassword)}
+                                className="h-[52px] bg-error">
+                                {isWithdrawing ? "탈퇴 중..." : "탈퇴하기"}
+                            </Button>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
         </KeyboardAvoidingView>
     );
 }

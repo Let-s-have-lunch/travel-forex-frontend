@@ -107,10 +107,7 @@ export interface UpdatePasswordResponse {
 export const updatePassword = async (
     request: UpdatePasswordRequest,
 ): Promise<UpdatePasswordResponse> => {
-    const response = await api.patch<UpdatePasswordResponse>(
-        "/users/password",
-        request,
-    );
+    const response = await api.patch<UpdatePasswordResponse>("/users/password", request);
 
     return response.data;
 };
@@ -118,8 +115,15 @@ export const updatePassword = async (
 /* ========================================
    회원 탈퇴
 ======================================== */
+export interface WithdrawUserRequest {
+    password: string;
+}
 
-export const deleteUser = async () => {
-    const response = await api.delete("/users/me");
+export interface WithdrawUserResponse {
+    message: string;
+}
+
+export const withdrawUser = async (data: WithdrawUserRequest): Promise<WithdrawUserResponse> => {
+    const response = await api.patch("/users/withdraw", data);
     return response.data;
 };
