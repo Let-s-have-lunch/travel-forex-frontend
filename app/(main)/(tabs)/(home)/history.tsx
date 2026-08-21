@@ -7,7 +7,6 @@ import TextComponent from "@/components/common/text/TextComponent";
 import axiosInstance from "@/api/axiosInstance";
 import { TransactionItem, PeriodType, PeriodOption } from "@/types/wallet";
 
-// 국가별 메타데이터
 const CURRENCY_META: Record<string, { flagUrl: string; symbol: string; defaultRate: number }> = {
     KRW: { flagUrl: "https://flagcdn.com/w160/kr.png", symbol: "₩", defaultRate: 1 },
     USD: { flagUrl: "https://flagcdn.com/w160/us.png", symbol: "$", defaultRate: 1424 },
@@ -20,9 +19,9 @@ const CURRENCY_META: Record<string, { flagUrl: string; symbol: string; defaultRa
 const PERIOD_OPTIONS: PeriodOption[] = [
     { label: "전체 내역", value: "ALL" },
     { label: "최근 1개월", value: "1M", months: 1 },
-    { label: "3개월", value: "3M", months: 3 },
-    { label: "6개월", value: "6M", months: 6 },
-    { label: "1년", value: "1Y", months: 12 },
+    { label: "최근 3개월", value: "3M", months: 3 },
+    { label: "최근 6개월", value: "6M", months: 6 },
+    { label: "최근 1년", value: "1Y", months: 12 },
 ];
 
 export default function HistoryPage() {
@@ -36,7 +35,6 @@ export default function HistoryPage() {
     const [transactions, setTransactions] = useState<TransactionItem[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
-    // 거래내역 조회 API
     const fetchTransactions = useCallback(async () => {
         try {
             setIsLoading(true);
@@ -119,11 +117,12 @@ export default function HistoryPage() {
             krwAmount: Number(calculatedKrw) || 0,
             bankName: tx.transactionMethod || tx.bankName || "은행 계좌",
             createdAt: tx.transactionDate || tx.createdAt || new Date().toISOString(),
+            memo: tx.memo || undefined, //
         };
     };
 
     useEffect(() => {
-        fetchTransactions();
+        fetchTransactions().then(() => {})
     }, [fetchTransactions]);
 
     const formatNumber = (num: number) => {
@@ -148,7 +147,6 @@ export default function HistoryPage() {
         return `${hours}:${minutes}`;
     };
 
-    // 입금/출금 탭 및 선택 기간 필터링
     const filteredList = transactions.filter(item => {
         const matchesTab = item.type === selectedTab;
         if (!matchesTab) return false;
@@ -169,7 +167,6 @@ export default function HistoryPage() {
         return txDate >= cutoffDate;
     });
 
-    // 날짜별 그룹화
     const groupedTransactions = filteredList.reduce<Record<string, TransactionItem[]>>(
         (acc, item) => {
             const dateKey = formatDate(item.createdAt);
@@ -198,7 +195,6 @@ export default function HistoryPage() {
             <StatusBar style="dark" />
 
             <View className="px-6 flex-1 max-w-[600px] w-full self-center">
-                {/* 상단 네비게이션 헤더 */}
                 <View className="relative py-4 items-center justify-center">
                     <TouchableOpacity
                         onPress={() => router.back()}
@@ -212,7 +208,6 @@ export default function HistoryPage() {
                     </TextComponent>
                 </View>
 
-                {/* 1. 입금 / 출금 토글 탭 */}
                 <View className="flex-row bg-[#EBEFEF] p-1 rounded-2xl mb-4">
                     <TouchableOpacity
                         className={`flex-1 py-2.5 rounded-xl items-center justify-center ${
@@ -241,7 +236,6 @@ export default function HistoryPage() {
                     </TouchableOpacity>
                 </View>
 
-                {/* 2. 기간 선택 필터 바 */}
                 <TouchableOpacity
                     activeOpacity={0.7}
                     onPress={() => setIsPeriodModalOpen(true)}
@@ -255,7 +249,6 @@ export default function HistoryPage() {
                     </View>
                 </TouchableOpacity>
 
-                {/* 3. 거래 내역 리스트 */}
                 <ScrollView
                     showsVerticalScrollIndicator={false}
                     contentContainerStyle={{ paddingBottom: 40 }}>
@@ -273,7 +266,7 @@ export default function HistoryPage() {
                                     {date}
                                 </TextComponent>
 
-                                <View className="space-y-3">
+                                <View className="space-y-4">
                                     {items.map(item => {
                                         const meta = CURRENCY_META[item.currency] || {
                                             flagUrl: "",
@@ -284,10 +277,9 @@ export default function HistoryPage() {
                                         return (
                                             <View
                                                 key={item.id}
-                                                className="flex-row justify-between items-center py-2.5">
-                                                {/* 좌측: 국기 + 정보 */}
-                                                <View className="flex-row items-center">
-                                                    <View className="w-10 h-10 rounded-full overflow-hidden border border-border mr-3 bg-gray-100 items-center justify-center">
+                                                className="flex-row justify-between items-start py-2">
+                                                <View className="flex-row items-start flex-1 mr-3">
+                                                    <View className="w-10 h-10 rounded-full overflow-hidden border border-border mr-3 bg-gray-100 items-center justify-center mt-0.5">
                                                         {meta.flagUrl ? (
                                                             <Image
                                                                 source={{ uri: meta.flagUrl }}
@@ -300,14 +292,22 @@ export default function HistoryPage() {
                                                             </TextComponent>
                                                         )}
                                                     </View>
-                                                    <View>
+                                                    <View className="flex-1">
                                                         <TextComponent className="text-sm font-bold text-text-primary mb-0.5">
                                                             {item.currency} {typeText}
                                                         </TextComponent>
-                                                        <TextComponent className="text-xs text-text-secondary">
+                                                        <TextComponent className="text-xs text-text-secondary mb-1.5">
                                                             {formatTime(item.createdAt)} |{" "}
                                                             {item.bankName}
                                                         </TextComponent>
+
+                                                        {item.memo ? (
+                                                            <View className="bg-background border border-border/80 self-start px-2.5 py-1 rounded-lg mt-0.5">
+                                                                <TextComponent className="text-xs text-text-secondary">
+                                                                    💬 {item.memo}
+                                                                </TextComponent>
+                                                            </View>
+                                                        ) : null}
                                                     </View>
                                                 </View>
 
@@ -330,7 +330,6 @@ export default function HistoryPage() {
                 </ScrollView>
             </View>
 
-            {/* 웹/모바일 겸용 중앙 팝업 다이얼로그 모달 */}
             <Modal visible={isPeriodModalOpen} transparent animationType="fade">
                 <TouchableOpacity
                     activeOpacity={1}

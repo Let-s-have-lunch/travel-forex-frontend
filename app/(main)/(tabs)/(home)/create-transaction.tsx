@@ -18,7 +18,6 @@ import Input from "@/components/common/input/Input";
 import Card from "@/components/common/card/Card";
 import axiosInstance from "@/api/axiosInstance";
 
-// 통화 메타데이터
 const CURRENCY_OPTIONS = [
     {
         code: "USD",
@@ -74,19 +73,16 @@ export default function CreateTransactionPage() {
     const isDeposit = type !== "WITHDRAW" && type !== "WITHDRAWAL";
     const typeLabel = isDeposit ? "입금" : "출금";
 
-    // 폼 상태값
     const [selectedCurrency, setSelectedCurrency] = useState(CURRENCY_OPTIONS[0]);
     const [amount, setAmount] = useState("");
     const [selectedMethod, setSelectedMethod] = useState("은행 계좌");
     const [memo, setMemo] = useState("");
 
-    // 날짜 상태값
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [calYear, setCalYear] = useState(new Date().getFullYear());
     const [calMonth, setCalMonth] = useState(new Date().getMonth());
     const [tempSelectedDay, setTempSelectedDay] = useState(new Date().getDate());
 
-    // 모달 상태값
     const [isCurrencyModalOpen, setIsCurrencyModalOpen] = useState(false);
     const [isMethodModalOpen, setIsMethodModalOpen] = useState(false);
     const [isDateModalOpen, setIsDateModalOpen] = useState(false);
@@ -103,7 +99,6 @@ export default function CreateTransactionPage() {
             .catch(err => console.error("지갑 조회 실패:", err));
     }, []);
 
-    // 화면 표시용 날짜 포맷 (예: 2026.08.21 (금))
     const formatDisplayDate = (d: Date) => {
         const year = d.getFullYear();
         const month = String(d.getMonth() + 1).padStart(2, "0");
@@ -112,14 +107,12 @@ export default function CreateTransactionPage() {
         return `${year}.${month}.${date} (${dayName})`;
     };
 
-    // 백엔드 전송용 날짜 포맷 ("YYYY-MM-DDTHH:mm:ss")
     const formatBackendDate = (d: Date) => {
         const pad = (n: number) => String(n).padStart(2, "0");
         const now = new Date();
         return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
     };
 
-    // 캘린더 날짜 계산
     const firstDayIndex = new Date(calYear, calMonth, 1).getDay();
     const totalDaysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
 
@@ -147,7 +140,6 @@ export default function CreateTransactionPage() {
         setIsDateModalOpen(false);
     };
 
-    // 실시간 원화 환산 계산
     const numAmount = parseFloat(amount) || 0;
     const calculatedKRW =
         selectedCurrency.code === "KRW"
@@ -206,7 +198,6 @@ export default function CreateTransactionPage() {
             <StatusBar style="dark" />
 
             <View className="flex-1 px-6 max-w-[600px] w-full self-center">
-                {/* 1. 상단 네비게이션 헤더 */}
                 <View className="relative py-4 items-center justify-center">
                     <TouchableOpacity
                         onPress={() => router.back()}
@@ -224,7 +215,6 @@ export default function CreateTransactionPage() {
                 <ScrollView
                     showsVerticalScrollIndicator={false}
                     contentContainerStyle={{ paddingBottom: 40, paddingTop: 10 }}>
-                    {/* 2. 통화 선택 */}
                     <TextComponent className="text-xs font-semibold text-text-primary mb-2">
                         통화 선택
                     </TextComponent>
@@ -249,7 +239,6 @@ export default function CreateTransactionPage() {
                         </Card>
                     </TouchableOpacity>
 
-                    {/* 3. 일시 선택 */}
                     <TextComponent className="text-xs font-semibold text-text-primary mb-2">
                         {typeLabel} 일시
                     </TextComponent>
@@ -272,7 +261,6 @@ export default function CreateTransactionPage() {
                         </Card>
                     </TouchableOpacity>
 
-                    {/* 4. 금액 입력 */}
                     <TextComponent className="text-xs font-semibold text-text-primary mb-2">
                         {typeLabel} 금액
                     </TextComponent>
@@ -297,7 +285,6 @@ export default function CreateTransactionPage() {
                         </TextComponent>
                     </Card>
 
-                    {/* 5. 방법 선택 */}
                     <TextComponent className="text-xs font-semibold text-text-primary mb-2">
                         {typeLabel} 방법 (선택)
                     </TextComponent>
@@ -315,7 +302,6 @@ export default function CreateTransactionPage() {
                         </Card>
                     </TouchableOpacity>
 
-                    {/* 6. 메모 입력 */}
                     <TextComponent className="text-xs font-semibold text-text-primary mb-2">
                         메모 (선택)
                     </TextComponent>
@@ -332,7 +318,6 @@ export default function CreateTransactionPage() {
                         />
                     </View>
 
-                    {/* 7. 저장하기 버튼 */}
                     <Button
                         color="primary"
                         size="large"
@@ -350,7 +335,6 @@ export default function CreateTransactionPage() {
                 </ScrollView>
             </View>
 
-            {/* 📅 캘린더 날짜 선택 모달 */}
             <Modal visible={isDateModalOpen} transparent animationType="fade">
                 <TouchableOpacity
                     activeOpacity={1}
@@ -359,7 +343,6 @@ export default function CreateTransactionPage() {
                     <View
                         className="bg-card w-full max-w-[360px] rounded-3xl p-5 border border-border"
                         onStartShouldSetResponder={() => true}>
-                        {/* 월 이동 헤더 */}
                         <View className="flex-row justify-between items-center mb-4">
                             <TouchableOpacity onPress={handlePrevMonth} className="p-2">
                                 <TextComponent className="text-lg font-bold text-text-primary">
@@ -376,7 +359,6 @@ export default function CreateTransactionPage() {
                             </TouchableOpacity>
                         </View>
 
-                        {/* 요일 헤더 */}
                         <View className="flex-row justify-between mb-2">
                             {DAYS_OF_WEEK.map((d, i) => (
                                 <TextComponent
@@ -389,7 +371,6 @@ export default function CreateTransactionPage() {
                             ))}
                         </View>
 
-                        {/* 날짜 그리드 */}
                         <View className="flex-row flex-wrap mb-4">
                             {Array.from({ length: firstDayIndex }).map((_, i) => (
                                 <View key={`empty-${i}`} className="w-[14.28%] h-9" />
@@ -418,7 +399,6 @@ export default function CreateTransactionPage() {
                             })}
                         </View>
 
-                        {/* 모달 확인 버튼 */}
                         <Button
                             color="primary"
                             size="medium"
@@ -432,7 +412,6 @@ export default function CreateTransactionPage() {
                 </TouchableOpacity>
             </Modal>
 
-            {/* 통화 선택 모달 */}
             <Modal visible={isCurrencyModalOpen} transparent animationType="fade">
                 <TouchableOpacity
                     activeOpacity={1}
@@ -464,7 +443,6 @@ export default function CreateTransactionPage() {
                 </TouchableOpacity>
             </Modal>
 
-            {/* 방법 선택 모달 */}
             <Modal visible={isMethodModalOpen} transparent animationType="fade">
                 <TouchableOpacity
                     activeOpacity={1}

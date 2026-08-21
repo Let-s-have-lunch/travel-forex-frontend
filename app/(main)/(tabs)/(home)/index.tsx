@@ -111,7 +111,7 @@ export default function HomePage() {
     };
 
     useEffect(() => {
-        fetchHomeData();
+        fetchHomeData().then(() => {})
     }, []);
 
     const formatNumber = (num: number) => {
@@ -144,7 +144,6 @@ export default function HomePage() {
                     </TextComponent>
                 </View>
 
-                {/* 2. MY WALLET 카드 (클릭 시 거래내역 페이지로 이동) */}
                 <TouchableOpacity
                     activeOpacity={0.9}
                     onPress={() => router.push("/(main)/(tabs)/(home)/history" as any)}>
@@ -181,7 +180,6 @@ export default function HomePage() {
                     </Card>
                 </TouchableOpacity>
 
-                {/* 3. 보유 외화 리스트 */}
                 <View className="mb-4 mt-6 flex-row justify-between items-center">
                     <TextComponent className="text-lg font-bold text-text-primary">
                         보유 외화
@@ -257,7 +255,6 @@ export default function HomePage() {
                 </View>
             </ScrollView>
 
-            {/* 4. 플로팅 버튼 (거래 유형 선택 페이지로 이동) */}
             <View className="absolute bottom-6 right-6">
                 <TouchableOpacity
                     className="w-14 h-14 bg-primary-main rounded-full items-center justify-center shadow-lg"
