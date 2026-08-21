@@ -10,6 +10,7 @@ export interface TransactionItem {
     krwAmount: number;
     bankName: string;
     createdAt: string;
+    memo?: string;
 }
 
 export interface PeriodOption {

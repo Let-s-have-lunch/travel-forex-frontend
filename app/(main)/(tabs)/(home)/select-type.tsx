@@ -21,7 +21,6 @@ export default function SelectTypePage() {
             <StatusBar style="dark" />
 
             <View className="flex-1 px-6 pb-6">
-                {/* 상단 헤더 */}
                 <View className="relative py-4 items-center justify-center">
                     <TouchableOpacity
                         onPress={() => router.back()}
@@ -39,9 +38,7 @@ export default function SelectTypePage() {
                     </TextComponent>
                 </View>
 
-                {/* 두 카드가 세로 공간을 균등하게 차지 */}
                 <View className="flex-1 flex-col gap-5 mt-4">
-                    {/* 1. 입금 카드 */}
                     <TouchableOpacity
                         className="flex-1"
                         activeOpacity={0.85}
@@ -63,7 +60,6 @@ export default function SelectTypePage() {
                         </Card>
                     </TouchableOpacity>
 
-                    {/* 2. 출금 카드 */}
                     <TouchableOpacity
                         className="flex-1"
                         activeOpacity={0.85}
