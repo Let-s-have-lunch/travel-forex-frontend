@@ -191,14 +191,6 @@ function LoginScreen() {
                                 )}
                             />
 
-                            <TouchableOpacity
-                                className="items-end mt-1"
-                                activeOpacity={0.7}
-                                onPress={() => console.log("비밀번호 찾기")}>
-                                <TextComponent className="text-[13px] text-text-secondary">
-                                    비밀번호를 잊으셨나요?
-                                </TextComponent>
-                            </TouchableOpacity>
                         </InputGroup>
                     </View>
 
