@@ -35,7 +35,7 @@ export default function RootLayout() {
                             {isInitialized && isLoggedIn && inPublicGroup && (
                                 <Redirect href="/(main)/(tabs)/(home)" />
                             )}
-                            {isInitialized && !isLoggedIn && !inPublicGroup && (
+                            {isInitialized && isLoggedIn && !inPublicGroup && (
                                 <Redirect href="/(public)" />
                             )}
                             <Slot />
