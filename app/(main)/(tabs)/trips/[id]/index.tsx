@@ -188,11 +188,7 @@ export default function TripDetailPage() {
                     title={trip.title}
                     showBackButton
                     onBackPress={() => router.back()}
-                    className="bg-transparent">
-                    <Button className="bg-transparent" shape="circle" size="small" variant="icon">
-                        <Feather color="#A1A1AA" name="info" size={24} />
-                    </Button>
-                </Title>
+                    className="bg-transparent"/>
             </View>
 
             <ScrollView
