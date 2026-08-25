@@ -179,7 +179,8 @@ export default function TripFormModal({
                         className="bg-surface w-full max-w-xl rounded-3xl p-6 shadow-xl">
                         <Title
                             title={isEditMode ? "여행지 수정" : "여행지 추가"}
-                            className="h-auto pb-6 mb-2"
+                            forceCenter={true}
+                            className="h-auto pb-6 mb-3 text-center"
                         />
 
                         {/* 1. 여행 이름 */}
