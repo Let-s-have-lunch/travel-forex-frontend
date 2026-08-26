@@ -161,7 +161,8 @@ export default function TripExpenseFormModal({
                         className="bg-surface w-full max-w-xl rounded-3xl p-6 shadow-xl">
                         <Title
                             title={isEditMode ? "지출 내역 수정" : "지출 추가"}
-                            className="h-auto pb-4 mb-2 px-0"
+                            className="mb-4 px-0"
+                            forceCenter={true}
                         />
 
                         {/* 1. 고정된 통화 표시 */}
