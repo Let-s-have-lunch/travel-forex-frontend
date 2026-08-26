@@ -11,8 +11,8 @@ import { calculateDays, formatCurrency } from "@/utils/formatters"; // 👈 유�
 interface TripListItemProps {
     item: Trip;
     isMenuOpen: boolean;
-    onPress: () => void;
-    onMenuToggle: () => void;
+    onPress: (id: number) => void;
+    onMenuToggle: (id: number) => void;
     onMenuClose: () => void;
     onEdit: (trip: Trip) => void;
     onDelete: (id: number) => void;
@@ -34,7 +34,7 @@ const TripListItem = memo(
 
         return (
             <View className="relative mb-4 z-10">
-                <TouchableOpacity activeOpacity={0.8} onPress={onPress}>
+                <TouchableOpacity activeOpacity={0.8} onPress={() => onPress(item.id)}>
                     <Card className="flex-row items-center p-4 relative">
                         <View className="w-16 h-[88px] rounded-xl bg-primary-sub mr-4 overflow-hidden">
                             <Image
@@ -70,7 +70,7 @@ const TripListItem = memo(
                             className="absolute top-4 right-2 p-2"
                             onPress={e => {
                                 e.stopPropagation();
-                                onMenuToggle();
+                                onMenuToggle(item.id);
                             }}>
                             <Feather name="more-vertical" size={20} color="#888" />
                         </TouchableOpacity>
