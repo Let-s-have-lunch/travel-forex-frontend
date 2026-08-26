@@ -61,7 +61,7 @@ const TripListItem = memo(
                             <View className="flex-row items-center">
                                 <View className="w-1 h-1 rounded-full bg-accent-coral mr-1.5" />
                                 <TextComponent className="text-xs text-text-secondary">
-                                    지출 ₩ 0
+                                    지출 ₩ {formatCurrency(item.totalExpenseKrw ?? 0)}
                                 </TextComponent>
                             </View>
                         </View>

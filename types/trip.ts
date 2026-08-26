@@ -10,4 +10,5 @@ export interface Trip {
     endDate: string;
     budgetKrw: number;
     currency: CurrencyCode; // 👈 새로 만든 타입 적용!
+    totalExpenseKrw: number;
 }
