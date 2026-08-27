@@ -22,7 +22,7 @@ import { LoginUserInputType, loginUserSchema } from "@/schemas/user/loginUserSch
 import { useAuthStore } from "@/stores/auth/useAuthStore";
 import Title from "@/components/common/title/Title";
 
-export default function LoginScreen() {
+function LoginScreen() {
     const { login } = useAuthStore();
     const router = useRouter();
 
@@ -41,10 +41,6 @@ export default function LoginScreen() {
             password: "",
         },
     });
-
-    /* ========================================
-       로그인 성공
-    ======================================== */
 
     const handleLogin = async (data: LoginUserInputType) => {
         try {
@@ -97,10 +93,6 @@ export default function LoginScreen() {
         }
     };
 
-    /* ========================================
-       Zod 검증 실패
-    ======================================== */
-
     const handleLoginError = (formErrors: typeof errors) => {
         console.log("❌ Zod 검증 실패:", formErrors);
     };
@@ -118,9 +110,6 @@ export default function LoginScreen() {
                 keyboardShouldPersistTaps="handled"
                 showsVerticalScrollIndicator={false}>
                 <View className="flex-1 px-[20px] pt-[28px]">
-                    {/* ========================================
-                        뒤로가기
-                    ======================================== */}
 
                     <Button
                         variant="icon"
@@ -132,10 +121,6 @@ export default function LoginScreen() {
                         <Feather name="chevron-left" size={26} color="#3F4643" />
                     </Button>
 
-                    {/* ========================================
-                        제목
-                    ======================================== */}
-
                     <View className="mt-5">
                         <Title
                             title="로그인"
@@ -144,10 +129,6 @@ export default function LoginScreen() {
                             textClassName="text-[28px]"
                         />
                     </View>
-
-                    {/* ========================================
-                        입력 영역
-                    ======================================== */}
 
                     <View className="mt-12">
                         {/* 이메일 */}
@@ -175,7 +156,6 @@ export default function LoginScreen() {
                             />
                         </InputGroup>
 
-                        {/* 비밀번호 */}
                         <InputGroup
                             label="비밀번호"
                             errorMessage={errors.password?.message}
@@ -211,21 +191,8 @@ export default function LoginScreen() {
                                 )}
                             />
 
-                            {/* 비밀번호 찾기 */}
-                            <TouchableOpacity
-                                className="items-end mt-1"
-                                activeOpacity={0.7}
-                                onPress={() => console.log("비밀번호 찾기")}>
-                                <TextComponent className="text-[13px] text-text-secondary">
-                                    비밀번호를 잊으셨나요?
-                                </TextComponent>
-                            </TouchableOpacity>
                         </InputGroup>
                     </View>
-
-                    {/* ========================================
-                        로그인 버튼
-                    ======================================== */}
 
                     <View className="mt-5">
                         <Button
@@ -241,10 +208,6 @@ export default function LoginScreen() {
                         </Button>
                     </View>
 
-                    {/* ========================================
-                        회원가입
-                    ======================================== */}
-
                     <View className="flex-row justify-center items-center mt-6">
                         <TextComponent className="text-[14px] text-text-secondary">
                             아직 회원이 아니신가요?
@@ -259,44 +222,11 @@ export default function LoginScreen() {
                         </TouchableOpacity>
                     </View>
 
-                    {/* ========================================
-                        구분선
-                    ======================================== */}
-
-                    <View className="flex-row items-center mt-8">
-                        <View className="flex-1 h-[1px] bg-divider" />
-
-                        <TextComponent className="mx-5 text-[13px] text-text-secondary">
-                            또는
-                        </TextComponent>
-
-                        <View className="flex-1 h-[1px] bg-divider" />
-                    </View>
-
-                    {/* ========================================
-                        게스트 둘러보기
-                    ======================================== */}
-
-                    <View className="mt-8">
-                        <Button
-                            color="primary"
-                            variant="outlined"
-                            size="large"
-                            shape="rounded"
-                            fullWidth
-                            onPress={() => {
-                                console.log("게스트로 둘러보기");
-                                router.replace("/");
-                            }}
-                            className="h-[58px]">
-                            게스트로 둘러보기
-                        </Button>
-                    </View>
-
-                    {/* 하단 여백 */}
                     <View className="flex-1" />
                 </View>
             </ScrollView>
         </KeyboardAvoidingView>
     );
 }
+
+export default LoginScreen;

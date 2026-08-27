@@ -49,7 +49,7 @@ export default function MyPage() {
                 {isLoggedIn ? (
                     <View className="mx-5 mb-6 rounded-md bg-white px-4 py-6">
                         <View className="flex-row items-center">
-                            {/* 사용자 정보 */}
+
                             <View className="ml-4">
                                 <View className={"flex-row items-center"}>
                                 <TextComponent className="text-lg font-bold text-primary-main">
@@ -73,12 +73,11 @@ export default function MyPage() {
                     <Pressable
                         onPress={handleLogin}
                         className="mx-5 mb-6 flex-row items-center rounded-md bg-primary-main px-5 py-5">
-                        {/* 로그인 아이콘 */}
+
                         <View className="h-14 w-14 items-center justify-center rounded-full bg-white/70">
                             <Feather name="user" size={24} color="#6FA89E" />
                         </View>
 
-                        {/* 로그인 안내 */}
                         <View className="ml-4 flex-1">
                             <TextComponent className="text-base font-bold text-white">
                                 로그인이 필요해요
@@ -93,10 +92,6 @@ export default function MyPage() {
                     </Pressable>
                 )}
 
-                {/* ========================= */}
-                {/* 회원 관리 */}
-                {/* ========================= */}
-
                 <MenuSection title="회원관리">
                     <MenuItem
                         icon="user"
@@ -105,27 +100,19 @@ export default function MyPage() {
                     />
                 </MenuSection>
 
-                {/* ========================= */}
-                {/* 고객센터 */}
-                {/* ========================= */}
+                {/*<MenuSection title="고객센터">*/}
+                {/*    <MenuItem*/}
+                {/*        icon="help-circle"*/}
+                {/*        title="1:1 문의"*/}
+                {/*        onPress={() => handleMenuPress("inquiry")}*/}
+                {/*    />*/}
 
-                <MenuSection title="고객센터">
-                    <MenuItem
-                        icon="help-circle"
-                        title="1:1 문의"
-                        onPress={() => handleMenuPress("inquiry")}
-                    />
-
-                    <MenuItem
-                        icon="message-circle"
-                        title="공지사항"
-                        onPress={() => handleMenuPress("notice")}
-                    />
-                </MenuSection>
-
-                {/* ========================= */}
-                {/* 기타 */}
-                {/* ========================= */}
+                {/*    <MenuItem*/}
+                {/*        icon="message-circle"*/}
+                {/*        title="공지사항"*/}
+                {/*        onPress={() => handleMenuPress("notice")}*/}
+                {/*    />*/}
+                {/*</MenuSection>*/}
 
                 <MenuSection title="기타">
                     <MenuItem
@@ -145,10 +132,6 @@ export default function MyPage() {
     );
 }
 
-/* ========================================
-   메뉴 섹션
-======================================== */
-
 interface MenuSectionProps {
     title: string;
     children: React.ReactNode;
@@ -166,10 +149,6 @@ function MenuSection({ title, children }: MenuSectionProps) {
     );
 }
 
-/* ========================================
-   메뉴 아이템
-======================================== */
-
 interface MenuItemProps {
     icon: keyof typeof Feather.glyphMap;
     title: string;
@@ -179,15 +158,13 @@ interface MenuItemProps {
 function MenuItem({ icon, title, onPress }: MenuItemProps) {
     return (
         <Pressable onPress={onPress} className="flex-row items-center py-4">
-            {/* 아이콘 */}
+
             <View className="w-8 items-center">
                 <Feather name={icon} size={21} className={"text-text-tertiary"} />
             </View>
 
-            {/* 텍스트 */}
             <TextComponent className="ml-3 flex-1 text-sm text-text-secondary">{title}</TextComponent>
 
-            {/* 화살표 */}
             <Feather name="chevron-right" size={20} className={"text-text-tertiary"} />
         </Pressable>
     );
