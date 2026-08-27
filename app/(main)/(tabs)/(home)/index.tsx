@@ -5,104 +5,160 @@ import { StatusBar } from "expo-status-bar";
 import { useRouter } from "expo-router";
 import TextComponent from "@/components/common/text/TextComponent";
 import Card from "@/components/common/card/Card";
-import axiosInstance from "@/api/axiosInstance";
+import walletApi, { WalletItem } from "@/api/user/walletApi";
+import exchangeRateApi from "@/api/user/exchangeRateApi";
+import { CurrencyCode } from "@/types/trip";
+import { ExchangeRateSummary } from "@/types/exchangeRate";
 
 const CURRENCY_META: Record<
     string,
-    { name: string; country: string; flagUrl: string; symbol: string; defaultRate: number }
+    { name: string; country: string; flagUrl: string; symbol: string }
 > = {
     KRW: {
         name: "대한민국 원",
         country: "한국",
         flagUrl: "https://flagcdn.com/w160/kr.png",
         symbol: "₩",
-        defaultRate: 1,
     },
     USD: {
         name: "미국 달러",
         country: "미국",
         flagUrl: "https://flagcdn.com/w160/us.png",
         symbol: "$",
-        defaultRate: 1424,
     },
     JPY: {
         name: "일본 엔",
         country: "일본",
         flagUrl: "https://flagcdn.com/w160/jp.png",
         symbol: "¥",
-        defaultRate: 9.13,
     },
-    EUR: {
-        name: "유로",
-        country: "유럽",
-        flagUrl: "https://flagcdn.com/w160/eu.png",
-        symbol: "€",
-        defaultRate: 1385,
-    },
+    EUR: { name: "유로", country: "유럽", flagUrl: "https://flagcdn.com/w160/eu.png", symbol: "€" },
     CNY: {
         name: "중국 위안",
         country: "중국",
         flagUrl: "https://flagcdn.com/w160/cn.png",
         symbol: "¥",
-        defaultRate: 195,
     },
     GBP: {
         name: "영국 파운드",
         country: "영국",
         flagUrl: "https://flagcdn.com/w160/gb.png",
         symbol: "£",
-        defaultRate: 1780,
     },
+};
+
+type CurrencyDisplayItem = {
+    id: number;
+    currency: CurrencyCode;
+    name: string;
+    country: string;
+    amount: number;
+    krw: number;
+    changeRate: number; // 부호 있는 등락률(%) — 표시용
+    flagUrl: string;
+    symbol: string;
 };
 
 export default function HomePage() {
     const router = useRouter();
-    const [currencyList, setCurrencyList] = useState<any[]>([]);
+    const [currencyList, setCurrencyList] = useState<CurrencyDisplayItem[]>([]);
     const [totalKRW, setTotalKRW] = useState(0);
-    const [changeRate, setChangeRate] = useState(1.25);
+    const [totalChangeRate, setTotalChangeRate] = useState(0); // 부호 있는 총자산 등락률(%)
     const [isLoading, setIsLoading] = useState(true);
 
     const fetchHomeData = async () => {
         try {
-            const response = await axiosInstance.get("/wallets");
-            const rawData = response.data;
-            const wallets = Array.isArray(rawData) ? rawData : rawData?.data || [];
+            const wallets: WalletItem[] = await walletApi.getMyWallets();
 
-            let calculatedTotalKRW = 0;
-            const formattedWallets = wallets.map((wallet: any) => {
+            // KRW를 제외한 보유 통화 목록 (환율 API 조회 대상)
+            const foreignCurrencies = Array.from(
+                new Set(wallets.map(w => w.currency).filter(c => c !== "KRW")),
+            ) as CurrencyCode[];
+
+            let rateMap = new Map<string, ExchangeRateSummary>();
+
+            if (foreignCurrencies.length > 0) {
+                try {
+                    const summaries = await exchangeRateApi.getSummary(
+                        foreignCurrencies,
+                        "ONE_DAY",
+                    );
+                    rateMap = new Map(summaries.map(s => [s.currencyCode, s]));
+                } catch (rateError) {
+                    console.error("환율 정보 조회 실패:", rateError);
+                    // 환율 조회 실패 시에도 지갑 목록 자체는 보여주되, 등락률은 0으로 처리
+                }
+            }
+
+            let totalCurrentKrw = 0;
+            let totalPreviousKrw = 0;
+
+            const formattedWallets: CurrencyDisplayItem[] = wallets.map(wallet => {
                 const meta = CURRENCY_META[wallet.currency] || {
                     name: wallet.currency,
                     country: "기타",
                     flagUrl: "",
                     symbol: wallet.currency,
-                    defaultRate: 1,
                 };
 
-                const balanceNum = Number(wallet.balance ?? wallet.amount) || 0;
-                const rate = Number(wallet.exchangeRate) || meta.defaultRate;
+                const balance = Number(wallet.balance) || 0;
 
-                const krwValue =
-                    wallet.currency === "KRW"
-                        ? balanceNum
-                        : Math.round(balanceNum * (wallet.currency === "JPY" ? rate / 100 : rate));
+                if (wallet.currency === "KRW") {
+                    totalCurrentKrw += balance;
+                    totalPreviousKrw += balance; // KRW는 환율 변동이 없음
 
-                calculatedTotalKRW += krwValue;
+                    return {
+                        id: wallet.id,
+                        currency: wallet.currency,
+                        name: meta.name,
+                        country: meta.country,
+                        amount: balance,
+                        krw: balance,
+                        changeRate: 0,
+                        flagUrl: meta.flagUrl,
+                        symbol: meta.symbol,
+                    };
+                }
+
+                const summary = rateMap.get(wallet.currency);
+                const currentRate = summary?.currentRate ?? 0;
+                const changePct = summary?.changeRate ?? 0; // 절대값(%)
+                const isUp = summary?.isUp ?? true;
+                const signedChangePct = isUp ? changePct : -changePct;
+
+                const currentKrw = Math.round(balance * currentRate);
+
+                // 등락률로부터 "어제 시점" 환율을 역산: previousRate = currentRate / (1 + pct/100)
+                const previousRate =
+                    currentRate > 0 && 1 + signedChangePct / 100 !== 0
+                        ? currentRate / (1 + signedChangePct / 100)
+                        : currentRate;
+                const previousKrw = Math.round(balance * previousRate);
+
+                totalCurrentKrw += currentKrw;
+                totalPreviousKrw += previousKrw;
 
                 return {
-                    id: wallet.id || wallet.walletId,
+                    id: wallet.id,
                     currency: wallet.currency,
                     name: meta.name,
                     country: meta.country,
-                    amount: balanceNum,
-                    krw: krwValue,
-                    changeRate: wallet.changeRate ?? 0.42,
+                    amount: balance,
+                    krw: currentKrw,
+                    changeRate: signedChangePct,
                     flagUrl: meta.flagUrl,
                     symbol: meta.symbol,
                 };
             });
 
+            const overallChangeRate =
+                totalPreviousKrw > 0
+                    ? ((totalCurrentKrw - totalPreviousKrw) / totalPreviousKrw) * 100
+                    : 0;
+
             setCurrencyList(formattedWallets);
-            setTotalKRW(calculatedTotalKRW);
+            setTotalKRW(totalCurrentKrw);
+            setTotalChangeRate(overallChangeRate);
         } catch (error) {
             console.error("지갑 데이터 조회 실패:", error);
         } finally {
@@ -111,7 +167,7 @@ export default function HomePage() {
     };
 
     useEffect(() => {
-        fetchHomeData().then(() => {})
+        fetchHomeData().then(() => {});
     }, []);
 
     const formatNumber = (num: number) => {
@@ -134,7 +190,6 @@ export default function HomePage() {
                 className="flex-1 px-6"
                 contentContainerStyle={{ paddingBottom: 100, paddingTop: 10 }}
                 showsVerticalScrollIndicator={false}>
-                {/* 1. 인사말 */}
                 <View className="mb-6 mt-4">
                     <TextComponent className="text-xl font-bold text-text-primary mb-1">
                         안녕하세요, 여행자님 👋
@@ -161,8 +216,9 @@ export default function HomePage() {
                                 ₩ {formatNumber(totalKRW)}
                             </TextComponent>
                             <TextComponent
-                                className={`text-xs font-bold ${changeRate >= 0 ? "text-success" : "text-error"}`}>
-                                {changeRate >= 0 ? "▲" : "▼"} {Math.abs(changeRate)}% (오늘)
+                                className={`text-xs font-bold ${totalChangeRate >= 0 ? "text-success" : "text-error"}`}>
+                                {totalChangeRate >= 0 ? "▲" : "▼"}{" "}
+                                {Math.abs(totalChangeRate).toFixed(2)}% (오늘)
                             </TextComponent>
                         </View>
 
@@ -240,8 +296,8 @@ export default function HomePage() {
                                             </TextComponent>
                                             <TextComponent
                                                 className={`text-xs font-bold ${isPositive ? "text-success" : "text-error"}`}>
-                                                {isPositive ? "▲" : "▼"} {Math.abs(item.changeRate)}
-                                                %
+                                                {isPositive ? "▲" : "▼"}{" "}
+                                                {Math.abs(item.changeRate).toFixed(2)}%
                                             </TextComponent>
                                         </View>
                                         <TextComponent className="text-xs text-text-tertiary">

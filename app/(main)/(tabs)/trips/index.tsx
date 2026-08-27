@@ -11,6 +11,7 @@ import TripFormModal from "@/components/domain/trips/TripFormModal";
 import TripListItem from "@/components/domain/trips/TripListItem";
 
 import { useTripList } from "@/hooks/useTripList";
+import { useCallback } from "react";
 
 export default function TripListPage() {
     const router = useRouter();
@@ -34,6 +35,25 @@ export default function TripListPage() {
         closeFormModal,
         setSelectedMenuTripId,
     } = useTripList();
+
+    const handleItemPress = useCallback(
+        (id: number) => {
+            setSelectedMenuTripId(null);
+            router.push(`/trips/${id}`);
+        },
+        [router, setSelectedMenuTripId],
+    );
+
+    const handleMenuToggle = useCallback(
+        (id: number) => {
+            setSelectedMenuTripId(prev => (prev === id ? null : id));
+        },
+        [setSelectedMenuTripId],
+    );
+
+    const handleMenuClose = useCallback(() => {
+        setSelectedMenuTripId(null);
+    }, [setSelectedMenuTripId]);
 
     return (
         <View className="flex-1 bg-background">
@@ -86,14 +106,10 @@ export default function TripListPage() {
                         <TripListItem
                             item={item}
                             isMenuOpen={selectedMenuTripId === item.id}
-                            onPress={() => {
-                                setSelectedMenuTripId(null);
-                                router.push(`/trips/${item.id}`);
-                            }}
-                            onMenuToggle={() =>
-                                setSelectedMenuTripId(prev => (prev === item.id ? null : item.id))
-                            }
-                            onMenuClose={() => setSelectedMenuTripId(null)}
+                            onPress={handleItemPress}
+                            onMenuToggle={handleMenuToggle}
+                            onMenuClose={handleMenuClose}
+
                             onEdit={handleEditTrip}
                             onDelete={handleDeleteTrip}
                         />

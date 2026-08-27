@@ -24,14 +24,6 @@ export default function MyPage() {
                 router.push("/my-page/edit-profile");
                 break;
 
-            case "inquiry":
-                router.push("/my-page/inquiries");
-                break;
-
-            case "notice":
-                router.push("/my-page/notice");
-                break;
-
             case "logout":
                 logout();
                 break;
