@@ -21,7 +21,7 @@ const systemTheme = Appearance.getColorScheme();
 export const useThemeStore = create<ThemeState>()(
     persist(
         set => ({
-            theme: systemTheme === "dark" ? "dark" : "light",
+            theme: systemTheme === "dark" ? "light" : "dark",
             onChangeTheme: () =>
                 set(state => ({ theme: state.theme === "light" ? "dark" : "light" })),
         }),
